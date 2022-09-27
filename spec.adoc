@@ -1,0 +1,114 @@
+= IFC-LD
+Devon Sparks
+v0.1, October, 2022: Pre-Release Draft 1
+:sectnums:
+:toc:
+
+
+== Rationale
+
+IFC-LD is a data model and family of serializations designed to support the exchange of information about the built environment. It provides a standard set of pre-defined "Containers" - Packages, Objects, and Slots - in which stakeholders can store and exchange information. It is interoperable with all existing versions of IFC, while supporting integration with alternative data models through use of linked data. Practically, IFC-LD aims to replace ISO 130301 Part 21 ("STEP" files) as the defacto exchange format for IFC. 
+
+IFC-LD attempts to solve several problems with IFC-based data exchanges through use of convention:
+
+1. To avoid use of custom parsers for ISO 130301 P21 ("STEP") files, IFC-LD provides a standard set of JSON-based serializations.
+
+2. To support integration and linking of data, IFC-LD uses JSON-LD to make the JSON serializations double as linked data.
+
+3. To discourage the use of monolithic model files, IFC-LD makes all assets (down to individual properties or "slots") uniformly addressable, and provides well-defined ways to share them with stakeholders.
+
+IFC-LD standardizes the ways IFC and IFC-adjacent data is packaged, but delegates to other specifications what those packages should contain for a particular use case. This separation of structure of the data envelope (IFC-LD) from the structure of its contents is what allows IFC-LD to integrate all existing IFC schemas while supporting new directions.
+
+== Requirements
+
+=== Data Addressability
+All exchanged data must be unformly addressable, because linking or referencing data requires it have a name. Given the distributed, global nature of the built environment, the most natural namespace for built assets is the web, where shared assets are addressable by URIs. 
+
+=== Interoperability (with STEP)
+The vast majority of the world's existing IFC data is encoded as ISO 13031 Part 21 STEP files. It is also the primary serialization existing commercial systems support. To encourage broad adoption of IFC-LD, and to ensure we can migrate existing asset data, interoperability with the Part 21 exchange format is required.
+
+=== Distributed By Design
+The data describing built assets is inherently distributed, because stakeholders describe assets from different points of view at different points in time. Any forward-looking exchange strategy, including IFC-LD, must take widespread data distribution and composition as prerequisites.
+
+=== Extensibility
+The IFC-LD specification cannot anticipate every need. Instead, it must provide a small set of capabilities that could later be extended. Rather than inventing these extension capabilities from scratch, it can reuse those provided by the modeling layers it builds upon (i.e., RDFS).
+
+== Design
+
+=== Data Model
+
+IFC-LD models a standard set of data "containers". Each container type and its relations are specified within RDFS, a data-modeling vocaulary for linked data. Through the use of JSON-LD, users of IFC-LD can produce and consume valid IFC-LD without any knowledge of linked data, treating it only as JSON following a standard JSON Schema.  
+
+
+==== Container
+"Container" is the root element within the IFC-LD type heirarchy. All assets exchanged via IFC-LD are or derived from Container. Containers defines several key properties: 
+
+* *@id*: Required. Defines the URI address of the IFC-LD Container
+* *@type*: Required. Defines one or more sets with which this Container shares a common trait (e.g., "ifc4:person" is the @type of all IFC4 Person instances)
+* *group*: Optional. A set of strings tagging the Container under a common classification (e.g., "Energy Performance", "Design Phase", "Unverified")
+
+
+==== Slots
+
+"Slots" are the building blocks of all other IFC-LD types. A Slot holds a specific piece of data, captured at a specific time, declared by a specific stakeholder. A Slot could represent a property value, a literal, a reference to an Object, or some other capability defined by other specifications. 
+
+Here is an example Slot in IFC-LD:
+
+```
+{   "@id":"Bdskjasd/asdj"
+    "@type":["Slot", "ifc4:person/4"],
+    "slotof":"Bdskjasd",
+    "contents":{
+        "@type":"xsd:string",
+        "value":".METRIC."
+    }
+}
+```
+
+Slots _should_ be related to the Objects they qualify through the "slotof" property. A Slot may be the _slotof_ more than one Object. When seen from the point of view of an Object, Slots describe the qualifying aspects of that Object.
+
+Slot data is stored in its "contents". The structure of "contents" depends on the Slot type. For Object references, contents provides the @id of the targeted Object. For property values, "contents" is made up of a "@type" and  "value". Composite values (lists, sets) is made up of @type and "values" (an array), represented as a JSON-LD @list to preserve order.
+
+
+[sidebar]
+.@types on Slots
+--
+The @type on a Slot's "contents" represents the semantic type of the Slot's literal value . In contrast, the @type of a Slot defines the classification of the Slot itself. 
+
+--
+
+****
+P21 Notes
+
+When available, a Slot "contents" @type maps to a known semantic type, like IfcRatioMeasure. Otherwise, a default XSD type is used. 
+****
+
+==== Objects
+
+"Objects" represent collection of Slots, each of which encodes some qualifying aspect of the Object. Like Slots, Objects are addressed by URI. Objects typically capture any asset, real or imagined, stakeholders want to track across time and revisions. Because their state is the superposition of many Slots (each with its own provenance information), Objects do not not themselves declare provenance information like timestamp or ownership. 
+
+****
+P21 Notes
+
+For interoperability with IFC-STP, Objects correspond to P21 instances. 
+****
+
+
+==== Packages
+
+
+=== Serializations
+
+==== application/ifc.json+stream
+
+==== application/ifc.json+pkg
+
+== Reference
+
+=== Examples
+
+=== Playground
+
+=== FAQs
+
+=== Community
