@@ -1,0 +1,60 @@
+[
+    {
+        "description": "I am a Slot representing area of utilization expressed according to local building codes.",
+        "group":"Site Planning",
+        "@id": "3boaO5Pe9D4fu1Ktf1qAcZ",
+        "@type": [
+            "Slot"
+        ],
+        "slotof": "2TqpgZlI94j9CZf2Mh_w89",
+        "contents": [
+            {
+                "@type": "ifc4:areameasure",
+                "value": 3252.6
+            }
+        ],
+        "meta": {
+            "who": "Quadri Lateral",
+            "when": "2020-05-10T00:00:30"
+        }
+    },
+    {
+        "description": "I am a Slot representing the calculated maximum height of buildings on this site according to local building codes.",
+        "group":"Site Planning",
+        "@id": "3brTazpcT2DQSCkG2kuGIm",
+        "@type": [
+            "Slot"
+        ],
+        "slotof": "2TqpgZlI94j9CZf2Mh_w89",
+        "contents": [
+            {
+                "@type": "ifc4:positivelengthmeasure",
+                "value": 32
+            }
+        ],
+        "meta": {
+            "who": "Acme Corp",
+            "when": "2020-11-30T17:44:46"
+        }
+    },
+
+    {
+        "description": "I am a Slot indicating whether the Site permits public access.",
+        "group":"Owner Reqiurements",
+        "@id": "3bvTIG_hLCjwhMCFTZy15R",
+        "@type": [
+            "Slot"
+        ],
+        "slotof": ["2TqpgZlI94j9CZf2Mh_w89","07rDKiqTT59BNsVJj21ptZ"],
+        "contents": [
+            {
+                "@type": "http://schema.org/publicAccess",
+                "value": false
+            }
+        ],
+        "meta": {
+            "who": "Owner Us",
+            "when": "2015-11-10T00:10:00"
+        }
+    }
+]

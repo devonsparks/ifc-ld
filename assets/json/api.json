@@ -1,0 +1,190 @@
+{
+    "openapi": "3.0.2",
+    "info": {
+        "version": "1.0.0",
+        "title": "Swagger Petstore",
+        "license": {
+            "name": "MIT"
+        }
+    },
+    "components": {
+        "schemas": {
+            "Stream":{
+                "anyOf":[]
+     
+            },
+            "StdPackage": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/LinkedData"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "objects": {
+                                "type": "object",
+                                "additionalProperties": {
+                                    "$ref": "#/components/schemas/Object"
+                                }
+                            }
+                        },
+                        "required": [
+                            "objects"
+                        ]
+                    }
+                ]
+            },
+            "Identifiable": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uri"
+                    }
+                },
+                "required": [
+                    "id"
+                ]
+            },
+            "Typed": {
+                "properties": {
+                    "type": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "type"
+                ]
+            },
+            "LinkedData": {
+                "type": "object",
+                "properties": {
+                    "@context": {
+                        "oneOf": [
+                            {
+                                "type": "array",
+                                "items": {
+                                    "type": "object"
+                                }
+                            },
+                            {
+                                "type": "object"
+                            },
+                            {
+                                "type": "string",
+                                "format": "uri"
+                            }
+                        ]
+                    }
+                },
+                "required": [
+                    "@context"
+                ]
+            },
+            "Asset": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/Identifiable"
+                    },
+                    {
+                        "$ref": "#/components/schemas/Typed"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "key": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ]
+            },
+            "Object": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/Asset"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "objectof": {
+                                "type": "string"
+                            },
+                            "slots": {
+                                "type": "object",
+                                "additionalProperties": {
+                                    "$ref": "#/components/schemas/Slot"
+                                }
+                            }
+                        },
+                        "required": [
+                            "objectof"
+                        ]
+                    }
+                ]
+            },
+            "Slot": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/Asset"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "slotof": {
+                                "type": "string"
+                            },
+                            "body": {
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Value"
+                                    },
+                                    {
+                                        "$ref": "#/components/schemas/Identifiable"
+                                    }
+                                ]
+                            }
+                        },
+                        "required": [
+                            "body",
+                            "slotof"
+                        ]
+                    }
+                ]
+            },
+            "Value": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/Typed"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "value": {
+                                "oneOf": [
+                                    {
+                                        "type": "number"
+                                    },
+                                    {
+                                        "type": "string"
+                                    },
+                                    {
+                                        "type": "array"
+                                    },
+                                    {
+                                        "type": "boolean"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ]
+                            }
+                        },
+                        "required": [
+                            "value"
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

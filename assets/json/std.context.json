@@ -20,6 +20,10 @@
         "@id": "http://ifc-ld.org#slotof",
         "@nest": "meta"
     },
+    "shortcut": {
+        "@type": "@id",
+        "@id": "http://ifc-ld.org#shortcut"
+    },
     "contents": {
         "@id": "http://ifc-ld.org#contents",
         "@container": "@list"
@@ -27,6 +31,10 @@
     "values": {
         "@id": "http:/ifc-ld.org#values",
         "@container": "@list"
+    },
+    "group": {
+        "@id": "http://ifc-ld.org#group",
+        "@type": "http://www.w3.org/2001/XMLSchema#string"
     },
     "xsd": "http://www.w3.org/2001/XMLSchema#",
     "ifc2": "http://buildingsmart.org/standards/ifc2/",
