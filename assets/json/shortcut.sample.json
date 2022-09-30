@@ -1,0 +1,18 @@
+{
+    "@id": "2TqpgZlI94j9CZf2Mh_w89/1",
+    "@type": [
+        "Slot",
+        "ifc5:building/3"
+    ],
+    "slotof": "2TqpgZlI94j9CZf2Mh_w89",
+    "shortcut": "http://w3id.org/bot#hasElement",
+    "contents": [
+        {
+            "@id": "2UZ7fqDD9EV9WoEvbxmdRf"
+        }
+    ],
+    "meta": {
+        "who": "Acme Corp",
+        "when": "2020-11-30T17:44:46"
+    }
+}

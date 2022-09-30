@@ -1,0 +1,39 @@
+[
+    {
+        "description": "I am a Slot representing the fourth value of an IFC4 Person Object.",
+        "@id": "2NrzylOdL18BgYXZEmG1XH",
+        "@type": [
+            "Slot",
+            "ifc4:person/4"
+        ],
+        "slotof": "2TqpgZlI94j9CZf2Mh_w89",
+        "contents": [
+            {
+                "@type": "xsd:string",
+                "value": "Marjorie"
+            }
+        ],
+        "meta": {
+            "who": "General Rotors",
+            "when": "2019-11-10T17:00:30"
+        }
+    },
+    {
+        "description": "I am a Slot representing an embedded link from an IFC5 Building to another Object",
+        "@id": "2TqpgZlI94j9CZf2Mh_w89/1",
+        "@type": [
+            "Slot",
+            "ifc5:building/3"
+        ],
+        "slotof": "2TqpgZlI94j9CZf2Mh_w89",
+        "contents": [
+            {
+                "@id": "2UZ7fqDD9EV9WoEvbxmdRf"
+            }
+        ],
+        "meta": {
+            "who": "Acme Corp",
+            "when": "2020-11-30T17:44:46"
+        }
+    }
+]

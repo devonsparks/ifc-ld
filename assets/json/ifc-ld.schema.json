@@ -1,0 +1,196 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "http://ifc-ld.org/specification/v1/json-schema#",
+    "title": "ifc-ld core schema",
+    "type": "object",
+    "oneOf": [
+        {
+            "$ref": "/definitions/StdPackage"
+        }
+    ],
+    "definitions": {
+        "StdPackage": {
+            "$id": "/definitions/StdPackage",
+            "allOf": [
+                {
+                    "$ref": "/definitions/LinkedData"
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "profile": {
+                            "const": "http://ifc-ld.org/specification#std"
+                        },
+                        "objects": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "$ref": "/definitions/Object"
+                            }
+                        }
+                    },
+                    "required": [
+                        "objects"
+                    ]
+                }
+            ]
+        },
+        "Identifiable": {
+            "$id": "/definitions/Identifiable",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "format": "uri"
+                }
+            },
+            "required": [
+                "id"
+            ]
+        },
+        "Typed": {
+            "$id": "/definitions/Typed",
+            "properties": {
+                "type": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "type"
+            ]
+        },
+        "LinkedData": {
+            "$id": "/definitions/LinkedData",
+            "type": "object",
+            "properties": {
+                "@context": {
+                    "oneOf": [
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "object"
+                            }
+                        },
+                        {
+                            "type": "object"
+                        },
+                        {
+                            "type": "string",
+                            "format": "uri"
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "@context"
+            ]
+        },
+        "Asset": {
+            "$id": "/definitions/Asset",
+            "allOf": [
+                {
+                    "$ref": "/definitions/Identifiable"
+                },
+                {
+                    "$ref": "/definitions/Typed"
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "key": {
+                            "type": "string"
+                        }
+                    }
+                }
+            ]
+        },
+        "Object": {
+            "$id": "/definitions/Object",
+            "allOf": [
+                {
+                    "$ref": "/definitions/Asset"
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "objectof": {
+                            "type": "string"
+                        },
+                        "slots": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "$ref": "/definitions/Slot"
+                            }
+                        }
+                    },
+                    "required": [
+                        "objectof"
+                    ]
+                }
+            ]
+        },
+        "Slot": {
+            "$id": "/definitions/Slot",
+            "allOf": [
+                {
+                    "$ref": "/definitions/Asset"
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "slotof": {
+                            "type": "string"
+                        },
+                        "body": {
+                            "oneOf": [
+                                {
+                                    "$ref": "/definitions/Value"
+                                },
+                                {
+                                    "$ref": "/definitions/Identifiable"
+                                }
+                            ]
+                        }
+                    },
+                    "required": [
+                        "body",
+                        "slotof"
+                    ]
+                }
+            ]
+        },
+        "Value": {
+            "$id": "/definitions/Value",
+            "allOf": [
+                {
+                    "$ref": "/definitions/Typed"
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "value": {
+                            "oneOf": [
+                                {
+                                    "type": "number"
+                                },
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "array"
+                                },
+                                {
+                                    "type": "boolean"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        }
+                    },
+                    "required": [
+                        "value"
+                    ]
+                }
+            ]
+        }
+    }
+}

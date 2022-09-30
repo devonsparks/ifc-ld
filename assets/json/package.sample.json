@@ -1,0 +1,8 @@
+{   "@id":"2EgCkpGWD308FjMK8nRzS0",
+    "@type":["Package"],
+    "meta":{
+        "who":"Acme Corp",
+        "when":"2020-11-30T17:44:46"
+    },
+    "objects":[]
+}
