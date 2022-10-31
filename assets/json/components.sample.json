@@ -1,12 +1,12 @@
 [
     {
-        "description": "I am a Slot representing the fourth value of an IFC4 Person Object.",
+        "description": "I am a Component representing the fourth value of an IFC4 Person Entity.",
         "@id": "2NrzylOdL18BgYXZEmG1XH",
         "@type": [
-            "Slot",
+            "Component",
             "ifc4:person/4"
         ],
-        "slotof": "2TqpgZlI94j9CZf2Mh_w89",
+        "componentof": "2TqpgZlI94j9CZf2Mh_w89",
         "contents": [
             {
                 "@type": "xsd:string",
@@ -19,13 +19,13 @@
         }
     },
     {
-        "description": "I am a Slot representing an embedded link from an IFC5 Building to another Object",
+        "description": "I am a Component representing an embedded link from an IFC5 Building to another Entity",
         "@id": "2TqpgZlI94j9CZf2Mh_w89/1",
         "@type": [
-            "Slot",
+            "Component",
             "ifc5:building/3"
         ],
-        "slotof": "2TqpgZlI94j9CZf2Mh_w89",
+        "componentof": "2TqpgZlI94j9CZf2Mh_w89",
         "contents": [
             {
                 "@id": "2UZ7fqDD9EV9WoEvbxmdRf"

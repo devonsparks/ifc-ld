@@ -1,12 +1,12 @@
 [
     {
-        "description": "I am a Slot representing area of utilization expressed according to local building codes.",
+        "description": "I am a Component representing area of utilization expressed according to local building codes.",
         "group":"Site Planning",
         "@id": "3boaO5Pe9D4fu1Ktf1qAcZ",
         "@type": [
-            "Slot"
+            "Component"
         ],
-        "slotof": "2TqpgZlI94j9CZf2Mh_w89",
+        "componentof": "2TqpgZlI94j9CZf2Mh_w89",
         "contents": [
             {
                 "@type": "ifc4:areameasure",
@@ -19,13 +19,13 @@
         }
     },
     {
-        "description": "I am a Slot representing the calculated maximum height of buildings on this site according to local building codes.",
+        "description": "I am a Component representing the calculated maximum height of buildings on this site according to local building codes.",
         "group":"Site Planning",
         "@id": "3brTazpcT2DQSCkG2kuGIm",
         "@type": [
-            "Slot"
+            "Component"
         ],
-        "slotof": "2TqpgZlI94j9CZf2Mh_w89",
+        "componentof": "2TqpgZlI94j9CZf2Mh_w89",
         "contents": [
             {
                 "@type": "ifc4:positivelengthmeasure",
@@ -39,13 +39,13 @@
     },
 
     {
-        "description": "I am a Slot indicating whether the Site permits public access.",
+        "description": "I am a Component indicating whether the Site permits public access.",
         "group":"Owner Reqiurements",
         "@id": "3bvTIG_hLCjwhMCFTZy15R",
         "@type": [
-            "Slot"
+            "Component"
         ],
-        "slotof": ["2TqpgZlI94j9CZf2Mh_w89","07rDKiqTT59BNsVJj21ptZ"],
+        "componentof": ["2TqpgZlI94j9CZf2Mh_w89","07rDKiqTT59BNsVJj21ptZ"],
         "contents": [
             {
                 "@type": "http://schema.org/publicAccess",

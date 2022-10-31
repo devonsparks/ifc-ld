@@ -10,14 +10,14 @@
         "@id": "http://ifc-ld.org#when",
         "@nest": "meta"
     },
-    "objectof": {
+    "entityof": {
         "@type": "@id",
-        "@id": "http://ifc-ld.org#objectof",
+        "@id": "http://ifc-ld.org#entityof",
         "@nest": "meta"
     },
-    "slotof": {
+    "componentof": {
         "@type": "@id",
-        "@id": "http://ifc-ld.org#slotof",
+        "@id": "http://ifc-ld.org#componentof",
         "@nest": "meta"
     },
     "shortcut": {

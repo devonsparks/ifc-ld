@@ -21,15 +21,15 @@
                         "profile": {
                             "const": "http://ifc-ld.org/specification#std"
                         },
-                        "objects": {
+                        "entities": {
                             "type": "object",
                             "additionalProperties": {
-                                "$ref": "/definitions/Object"
+                                "$ref": "/definitions/Entity"
                             }
                         }
                     },
                     "required": [
-                        "objects"
+                        "entities"
                     ]
                 }
             ]
@@ -83,8 +83,8 @@
                 "@context"
             ]
         },
-        "Asset": {
-            "$id": "/definitions/Asset",
+        "Container": {
+            "$id": "/definitions/Container",
             "allOf": [
                 {
                     "$ref": "/definitions/Identifiable"
@@ -102,41 +102,41 @@
                 }
             ]
         },
-        "Object": {
-            "$id": "/definitions/Object",
+        "Entity": {
+            "$id": "/definitions/Entity",
             "allOf": [
                 {
-                    "$ref": "/definitions/Asset"
+                    "$ref": "/definitions/Container"
                 },
                 {
                     "type": "object",
                     "properties": {
-                        "objectof": {
+                        "entityof": {
                             "type": "string"
                         },
-                        "slots": {
+                        "components": {
                             "type": "object",
                             "additionalProperties": {
-                                "$ref": "/definitions/Slot"
+                                "$ref": "/definitions/Component"
                             }
                         }
                     },
                     "required": [
-                        "objectof"
+                        "entityof"
                     ]
                 }
             ]
         },
-        "Slot": {
-            "$id": "/definitions/Slot",
+        "Component": {
+            "$id": "/definitions/Component",
             "allOf": [
                 {
-                    "$ref": "/definitions/Asset"
+                    "$ref": "/definitions/Container"
                 },
                 {
                     "type": "object",
                     "properties": {
-                        "slotof": {
+                        "componentof": {
                             "type": "string"
                         },
                         "body": {
@@ -152,7 +152,7 @@
                     },
                     "required": [
                         "body",
-                        "slotof"
+                        "componentof"
                     ]
                 }
             ]
@@ -179,9 +179,6 @@
                                 },
                                 {
                                     "type": "boolean"
-                                },
-                                {
-                                    "type": "null"
                                 }
                             ]
                         }

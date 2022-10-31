@@ -1,14 +1,16 @@
 = IFC-LD
-v0.1, October, 2022: Pre-Release Draft 1
+v0.1.1, October, 2022: Pre-Release Draft 2
 :sectnums:
 :figure-caption!:
 :toc:
+:source-highlighter: pygments
+:data-uri:
 
 NOTE: As of fall 2022, this specification is under active community review. Prose and data samples may have inconsistencies. Please report all issues or proposals through https://github.com/devonsparks/ifc-ld[Github].
 
 == Rationale
 
-IFC-LD is a data model and family of serializations designed to support the exchange of information about the built environment. It provides a standard set of pre-defined "Containers" - Packages, Objects, and Slots - in which stakeholders can store and exchange information. It is interoperable with all existing versions of IFC, while supporting integration with alternative data models through use of linked data. Practically, IFC-LD aims to replace ISO 10303-21 ("P21" files) as the leading exchange format for IFC. 
+IFC-LD is a data model and family of serializations designed to support the exchange of information about the built environment. It provides a standard set of predefined "Containers" - Packages, Entities, and Components - in which stakeholders can store and exchange information. It is interoperable with all existing versions of IFC, while embracing new directions. Practically, IFC-LD aims to replace ISO 10303-21 ("P21" files) as the leading exchange format for IFC. 
 
 IFC-LD attempts to solve several problems with IFC-based data exchanges through use of convention:
 
@@ -16,7 +18,7 @@ IFC-LD attempts to solve several problems with IFC-based data exchanges through 
 
 2. To support integration and linking of data, IFC-LD uses https://json-ld.org/[JSON-LD] to make the JSON serializations double as linked data.
 
-3. To discourage the use of monolithic model files, IFC-LD makes all assets (down to individual properties or "slots") uniformly addressable, and provides well-defined ways to share them with stakeholders.
+3. To discourage the use of monolithic model files, IFC-LD makes all assets (down to individual properties or "Components") uniformly addressable, and provides well-defined ways to share them with stakeholders.
 
 IFC-LD standardizes the ways IFC and IFC-adjacent data is packaged, but delegates to other specifications what those packages should contain for a particular use case. This separation of structure of the data envelope (IFC-LD) from the structure of its contents is what allows IFC-LD to integrate all existing IFC schemas while supporting new directions.
 
@@ -50,24 +52,24 @@ IFC-LD defines the following container types for organizing information.
 * *group*: Optional. A set of strings tagging the Container under a common functional category (e.g., "Energy Performance", "Design Phase", "Unverified")
 
 
-==== Slots
+==== Components
 
-A Slot is a Container that holds "contents", captured at a specific time, declared by a specific stakeholder. A Slot's "contents" can represent a property value, a reference to an Object, or some other capability defined by other specifications. 
+A Component is a Container that holds "contents", captured at a specific time, declared by a specific stakeholder. A Component's "contents" can represent a property value, a reference to an Entity, or some other capability defined by other specifications. 
 
-Here are example Slots in IFC-LD:
+Here are example Components in IFC-LD:
 
 [source, json]
 ----
-include::assets/json/slots.sample.json[]
+include::assets/json/components.sample.json[]
 ----
 
-Slots _should_ be related to the Objects they qualify through the "slotof" property. A Slot may be the _slotof_ more than one Object. When seen from the point of view of an Object, Slots describe qualifying aspects of that Object.
+Components _should_ be related to the Entities they qualify through the "componentof" property. A Component may be the _componentof_ more than one Entity. When seen from the point of view of an Entity, Components describe qualifying aspects of that Entity.
 
-Slot data is stored in its "contents". The structure of _contents_ depends on the Slot. For Object references, contents provides the @id of the targeted Object. For property values, "contents" is made up of a "@type" and  "value". Composite values (lists, sets) are made up of @type and "values" (an array), represented as a JSON-LD @list to preserve order. 
+Component data is stored in its "contents". The structure of _contents_ depends on the Component. For Entity references, contents provides the @id of the targeted Entity. For property values, "contents" is made up of a "@type" and  "value", the latter of which may be a (possibly nested) list.
 
-NOTE: During conversion with P21 data, a Slot's "contents" @type maps to a known semantic type, like IfcRatioMeasure. Otherwise, a default XSD type is used. 
+NOTE: During conversion with P21 data, a Component's "contents" @type maps to a known semantic type, like IfcRatioMeasure. Otherwise, a default XSD type is used. 
 
-Slots _may_ also declare a "shortcut" property, whose value is a URI, specifying the relationship the Slot defines between its linked Objects (via _slotof_) and its _contents_. For example, a Slot may declare its linked Object is related to its Object reference contents via https://w3c-lbd-cg.github.io/bot/[Building Topology Ontology]'s "hasElement" relation: 
+Components _may_ also declare a "shortcut" property, whose value is a URI, specifying the relationship the Component defines between its linked Entities (via _componentof_) and its _contents_. For example, a Component may declare its linked Entity is related to its Entity reference contents via https://w3c-lbd-cg.github.io/bot/[Building Topology Ontology]'s "hasElement" relation: 
 
 [source,json]
 ----
@@ -78,33 +80,33 @@ Linked data-aware systems may then use this shortcut property to "unpack" the un
 
 [source,sparql]
 ----
-SELECT DISTINCT ?object ?shortcut ?target WHERE {
-  ?slot <http://ifc-ld.org#slotof> ?object .
-  ?slot <http://ifc-ld.org#shortcut> ?shortcut .
-  ?slot <http://ifc-ld.org#contents> ?target . 
+SELECT DISTINCT ?Entity ?shortcut ?target WHERE {
+  ?Component <http://ifc-ld.org#Componentof> ?Entity .
+  ?Component <http://ifc-ld.org#shortcut> ?shortcut .
+  ?Component <http://ifc-ld.org#contents> ?target . 
 }
 ----
 
-Use of Slot shortcuts is optional.
+Use of Component shortcuts is optional.
 
 
-==== Objects
+==== Entities
 
-"Objects" are a Container for Slots, with each Slot encoding some qualifying aspect of the Object. Like Slots, Objects are addressed by URI. Objects typically capture any asset, real or imagined, stakeholders want to track across time and revisions. Because their state is the superposition of many Slots (each with its own provenance information), Objects do not not themselves declare provenance information like timestamp or ownership. 
+"Entities" are a Container for Components, with each Component encoding some qualifying aspect of the Entity. Like Components, Entities are addressed by URI. Entities typically capture any asset, real or imagined, stakeholders want to track across time and revisions. Because their state is the superposition of many Components (each with its own provenance information), Entities do not not themselves declare provenance information like timestamp or ownership. 
 
-Objects _should_ be grouped into one or more Packages, each of which captures the circumstances that changed the state of the Object (through the introduction of new Slots). An Object may be the _objectof_ more than one Package. 
+Entities _should_ be grouped into one or more Packages, each of which captures the circumstances that changed the state of the Entity (through the introduction of new Components). An Entity may be the _entityof_ more than one Package. 
 
-Here is an example Object:
+Here is an example Entity:
 [source,json]
 ----
-include::assets/json/object.sample.json[]
+include::assets/json/entity.sample.json[]
 ----
 
-NOTE: For interoperability with IFC-STP, Objects correspond to P21 instances. 
+NOTE: For interoperability with IFC-STP, Entities correspond to P21 instances. 
 
 ==== Packages
 
-Packages are Containers for Objects. Packages define some event - a project deliverable, point-to-point exchange, etc - that justified the modification or transaction of Objects and Slots. Because Packages describe events, they contain provenance information similar to Slots.
+Packages are Containers for Entities. Packages define some event - a project deliverable, point-to-point exchange, etc - that justified the modification or transaction of Entities and Components. Because Packages describe events, they contain provenance information similar to Components.
 
 Here is an example Package:
 
@@ -118,7 +120,7 @@ include::assets/json/package.sample.json[]
 
 The IFC-LD data model is independent of its serialization. It it possible, for example, to use standard RDF encodings to serialize IFC-LD as XML, HTML, JSON, Turle, or N3. IFC-LD recommends JSON as its primary serialization format, because it allows the data to be parsed without external tools, and can be treated as JSON for systems without linked data support.
 
-JSON's flexibility permits more than one JSON representation of the same IFC-LD data. For example, a collection of Packages, Objects, and Slots could be organized as a JSON array (suitable for streaming), or as a hierarchical JSON object (suitable for browser or lookup by ID). IFC-LD therefore supports several standard JSON serializations, each identified by its own https://en.wikipedia.org/wiki/Media_type[media type]. Where possible, these serializations strive to be losslessly interoperable. 
+JSON's flexibility permits more than one JSON representation of the same IFC-LD data. For example, a collection of Packages, Entities, and Components could be organized as a JSON array (suitable for streaming), or as a hierarchical JSON Entity (suitable for browsing or lookup by ID). IFC-LD therefore supports several standard JSON serializations, each identified by its own https://en.wikipedia.org/wiki/Media_type[media type]. Where possible, these serializations strive to be losslessly interoperable. 
 
 ==== application/ifc.json+stream
 
@@ -130,11 +132,11 @@ Here is a sample IFC-LD stream:
 include::assets/json/stream.sample.json[]
 ----
 
-IFC-LD streams are useful for event-driven systems and one-at-a-time processing. They encourage the the exchange of "delta updates", wherein individual Slots, Objects, and Packages can be exchanged, instead of monolithic model files. 
+IFC-LD streams are useful for event-driven systems and one-at-a-time processing. They encourage the the exchange of "delta updates", wherein individual Components, Entities, and Packages can be exchanged, instead of monolithic model files. 
 
 ==== application/ifc.json+pkg
 
-The IFC-LD "Package" format, identified by media type `application/ifc.json+pkg`, captures IFC-LD assets as a nested hierarchy of Containers, where a root Package contains Objects, and Objects contain Slots. 
+The IFC-LD "Package" format, identified by media type `application/ifc.json+pkg`, captures IFC-LD assets as a nested hierarchy of Containers, where a root Package contains Entities, and Entities contain Components. 
 
 Here is a sample IFC-LD Package file:
 
@@ -143,7 +145,7 @@ Here is a sample IFC-LD Package file:
 include::assets/json/pkg.sample.json[]
 ----
 
-The IFC-LD Package format is most useful for browsing the Objects of a single Package. Because Objects and Slots in this format are indexed by JSON keys, systems without linked data support can still traverse the network of linked objects by dereferencing the corresponding JSON keys. 
+The IFC-LD Package format is most useful for browsing the Entities of a single Package. Because Entities and Components in this format are indexed by JSON keys, systems without linked data support can still traverse the network of linked Entities by dereferencing the corresponding JSON keys. 
 
 NOTE: For interoperability with IFC-STP, the IFC-LD Package format corresponds to a P21 instance population. 
 
@@ -151,7 +153,7 @@ NOTE: For interoperability with IFC-STP, the IFC-LD Package format corresponds t
 
 `application/ifc.json+stream` and `application/ifc.json+pkg` are losslessly interoperable. A IFC-LD stream can be encoded in the package format and back again with no loss of information. The <<Proof-of-Concept Transformation Pipeline>> outlines a reference architecture for this transformation flow, with notes for future work. 
 
-Future versions of the IFC-LD specification may introduce at least one JSON serialization that is derived from, but not losslessly convertible to, the stream or package formats. These serializations would be tailored to specific use cases (e.g., visualization) where small file size is the key objective. 
+Future versions of the IFC-LD specification may introduce at least one JSON serialization that is derived from, but not losslessly convertible to, the stream or package formats. These serializations would be tailored to specific use cases (e.g., visualization) where small file size is the key Entityive. 
 
 === Address Structure
 
@@ -159,18 +161,18 @@ Being linked data, all IFC-LD Container addresses are URIs. The structure of the
 
 As general rules, IFC-LD recommends:
 
-. All Packages, Objects, and Slots use http://ifc-ld.org# as their default base path.
+. All Packages, Entities, and Components use http://ifc-ld.org# as their default base path.
 
 For IFC P21 interoperability, IFC-LD recommends:
 
-. Packages, Objects, Slots form their URIs by concatenting the base path with a valid 22-character IfcGUID, either extracted from the relevant P21 instance, or randomly https://technical.buildingsmart.org/resources/ifcimplementationguidance/ifc-guid/[generated] otherwise. For example, `http://ifc-ld.org#2TqpgZlI94j9CZf2Mh_w89/``
+. Packages, Entities, Components form their URIs by concatenting the base path with a valid 22-character IfcGUID, either extracted from the relevant P21 instance, or randomly https://technical.buildingsmart.org/resources/ifcimplementationguidance/ifc-guid/[generated] otherwise. For example, `http://ifc-ld.org#2TqpgZlI94j9CZf2Mh_w89/``
 
 
 For IFC P21 interoperability, IFC-LD requires:
 
-. All Object @types be defined by concatenating the IFC schema version's base path (defined for each schema version part of the <<JSON-LD Specification>>) with the name of the IFC type after trimming the "Ifc" prefix, and converting to lowercase. For example, `http://buildingsmart.org/standards/ifc4/person` to address all IFC4 IfcPersons. The schema version is taken from the P21 "file_schema" header and converted to lowercase.
+. All Entity @types be defined by concatenating the IFC schema version's base path (defined for each schema version part of the <<JSON-LD Specification>>) with the name of the IFC type after trimming the "Ifc" prefix, and converting to lowercase. For example, `http://buildingsmart.org/standards/ifc4/person` to address all IFC4 IfcPersons. The schema version is taken from the P21 "file_schema" header and converted to lowercase.
 
-. All Slot @types be defined by concatenating the parent P21 Object's URI with the offset of the Slot within the Object. For example, `http://buildingsmart.org/standards/ifc4/person/4` to address all Slots that are the fourth entry of an IFC4 Person instance.
+. All Component @types be defined by concatenating the parent P21 Entity's URI with the offset of the Component within the Entity. For example, `http://buildingsmart.org/standards/ifc4/person/4` to address all Components that are the fourth entry of an IFC4 Person instance.
 
 
 === Provenance
@@ -187,29 +189,29 @@ Integrators may introduce other provenance fields to "meta" as needed.
 
 === Looking Forward: ECS, Modules, and Compositional Modeling
 
-There's a growing recognition within the industry to support https://en.wikipedia.org/wiki/Composition_over_inheritance["composition modeling"] of built asset data. Property Sets within the existing IFC specification support one flavor of this, in that multiple parties can attach different pieces of data to the same asset without prior coordination. How far can this model be taken and how can IFC-LD help?
+There's a growing recognition within the industry to support https://en.wikipedia.org/wiki/Composition_over_inheritance["modeling by composition"] for built asset data. Property Sets within the existing IFC specification support one flavor of this, in that multiple parties can attach different pieces of data to the same asset without prior coordination. How far can this model be taken and how can IFC-LD help?
 
-IFC-LD supports compositional modeling at its core. Objects, which represent assets that persist across time and stakeholder revision, are primarily identified by a URI. Slots, describing qualifying aspects (e.g., properties, relations) of Objects, can be linked to any number of Objects via their _slotof_ values. As a result, mltiple stakeholders, at multiple points in time, can attach multiple pieces of data (Slot _contents_) to the same Object, without prior coordination. By labeling Slots as belonging to one or more Slot _groups_, Slots can be bundled into functional categories, making them behave equivalently to current IFC Property Sets. Together, Objects and Slots form the foundation of an industry standard https://en.wikipedia.org/wiki/Entity_component_system[entity component model]. 
+IFC-LD supports compositional modeling at its core. Entities, which represent assets that persist across time and stakeholder revision, are primarily identified by a URI. Components, describing qualifying aspects (e.g., properties, relations) of Entities, can be linked to any number of Entities via their _componentof_ values. As a result, multiple stakeholders, at multiple points in time, can attach multiple pieces of data (Component _contents_) to the same Entity, without prior coordination. By labeling Components as belonging to one or more Component _groups_, Components can be bundled into functional categories, making them behave equivalently to current IFC Property Sets. Together, Entities and Components form the foundation of an industry standard https://en.wikipedia.org/wiki/Entity_component_system[entity component model]. 
 
-NOTE: Compositional modeling in IFC-LD can be applied regardless of whether P21 integration is applied. The same Object may contain Slots mapped to existing IFC schemas and those developed independently without conflict. 
+NOTE: Compositional modeling in IFC-LD can be applied regardless of whether P21 integration is applied. The same Entity may contain Components mapped to existing IFC schemas and those developed independently without conflict. 
 
-For example, consider the following set of Slot definitions:
+For example, consider the following set of Component definitions:
 
 [source, json]
 ----
 include::assets/json/ecs.sample.json[]
 ----
 
-All three Slots are the _slotof_ the same Object _2TqpgZlI94j9CZf2Mh_w89_ - in this case, some kind of building site. The third Slot is also the _slotof_ a second Object, _07rDKiqTT59BNsVJj21ptZ_, which represents a second site under the owner's control. The use of two Objects references in the third _slotof_ allows the same declaration of public access to be shared across Objects. Change the Slot value to true, and _all_ linked Objects will now record public access as allowed. 
+All three Components are the _componentof_ the same Entity _2TqpgZlI94j9CZf2Mh_w89_ - in this case, some kind of building site. The third Component is also the _componentof_ a second Entity, _07rDKiqTT59BNsVJj21ptZ_, which represents a second site under the owner's control. The use of two Entity references in the third _componentof_ allows the same declaration of public access to be shared across Entities. Change the Component value to true, and _all_ linked Entities will now record public access as allowed. 
 
-Next, notice the provenance data attached to each Slot. Each Slot has been contributed by a different stakeholder at a different point in time. All can be composed, because they use global Object addresses to qualify what they're describing.
+Next, notice the provenance data attached to each Component. Each Component has been contributed by a different stakeholder at a different point in time. All can be composed, because they use global Entity addresses to qualify what they're describing.
 
-Finally, note that by specifying "group" labels, each of the Slots can be organized into functional categories akin to traditional IFC Property Sets. In this case, the categories are "Site Planning" and "Owner Requirements". Stakeholders may use these group labels to filter for Slots of interest.
+Finally, note that by specifying "group" labels, each of the Components can be organized into functional categories akin to traditional IFC Property Sets. In this case, the categories are "Site Planning" and "Owner Requirements". Stakeholders may use these group labels to filter for Components of interest.
 
-These key features of Slots - the ability to link to multiple Objects and group by functional category - is what makes IFC-LD a compositional system at its core. 
+These key features of Components - the ability to link to multiple Entities and group by functional category - is what makes IFC-LD a compositional system at its core. 
 
 ==== Modules
-To help take IFC in new directions, we recommend the compositional modeling support of IFC-LD be used to develop collections related of Slot definitions, called "Modules", that fulfill specific use cases, design processes, or functional categories. We imagine modules tailored to energy performance, massing design, construction administration, and more. Industry working groups for each module would take responsibility for the module's design and release cycle. Many modules would be publicly shared to increase interoperability, but some may be tailored to particular delivery processes or firms. All Modules _should_ supply a standard set of Slot schema definitions (see <<Schema Validation Strategy>>).
+To help take IFC in new directions, we recommend the compositional modeling support of IFC-LD be used to develop collections related of Component definitions, called "Modules", that fulfill specific use cases, design processes, or functional categories. We imagine modules tailored to energy performance, massing design, construction administration, and more. Industry working groups for each module would take responsibility for the module's design and release cycle. Many modules would be publicly shared to increase interoperability, but some may be tailored to particular delivery processes or firms. All Modules _should_ supply a standard set of Component schema definitions (see <<Schema Validation Strategy>>).
 
 === Schema Validation Strategy
 
@@ -217,11 +219,11 @@ Being built on linked data, and requiring https://en.wikipedia.org/wiki/Closed-w
 
 To help keep the overhead of working with SHACL low, we recommend the following guidelines be established for all IFC-LD schema definition:
 
-. Where possible, target SHACL schema definitions, called "shapes", against IFC-LD Slots. This allows every shape to remain small and independently testable. It also allows legacy constraints from the existing IFC schema to be developed on an as-needed basis.
+. Where possible, target SHACL schema definitions, called "shapes", against IFC-LD Components. This allows every shape to remain small and independently testable. It also allows legacy constraints from the existing IFC schema to be developed on an as-needed basis.
 
-. As part of an IFC-LD community effort, publish a SHACL "Slot Schema Starter Kit" with standard shapes for common use cases (matching a property value exactly, ensuring a number is within a range, etc). Many common constraint checks are variations on a theme, so providing templates allows new ideas to be tested with minimal overhead.
+. As part of an IFC-LD community effort, publish a SHACL "Component Schema Starter Kit" with standard shapes for common use cases (matching a property value exactly, ensuring a number is within a range, etc). Many common constraint checks are variations on a theme, so providing templates allows new ideas to be tested with minimal overhead.
 
-Because Slots _should_ declare at least one custom *@type*, Slot-based SHACL shapes can be easily written by targetting the Slot's *@type* using `sh:targetClass`. For example, here's a SHACL shape constraining the size of IFC4 IfcGUID Slots (defined as the first Slot of IfcRoot):
+Because Components _should_ declare at least one custom *@type*, Component-based SHACL shapes can be easily written by targetting the Component's *@type* using `sh:targetClass`. For example, here's a SHACL shape constraining the size of IFC4 IfcGUID Components (defined as the first Component of IfcRoot):
 
 [source, turtle]
 ----
@@ -237,7 +239,7 @@ ex:IfcGUIDShape
 	] .
 ----
 
-CAUTION: Slot _contents_ structure has been under revision and may need to be brought into alignment with SHACL sh:path targets. 
+CAUTION: Component _contents_ structure has been under revision and may need to be brought into alignment with SHACL sh:path targets. 
 
 === Industry Adoption Strategy
 
@@ -301,7 +303,7 @@ You could encode this in JSON as
 [source, json]
 ----
 [
-    ['IFCMEASUREWITHUNIT', 0.017453292519943, 45]
+    ["IFCMEASUREWITHUNIT", 0.017453292519943, 45]
 ]
 ----
 
@@ -309,7 +311,7 @@ It captures most of what's in the original instance:
 
 . The P21 instance ID is replaced with a dedicated offset within a JSON parent array
 . The instance type is stored as the first element of the array.
-. All attributes are stored at their respective offset. Object references are encoded as integers.
+. All attributes are stored at their respective offset. Entity references are encoded as integers.
 . It's compact and amenable to streaming.
 
 It's a nice encoding. It also has multiple problems:
@@ -317,12 +319,12 @@ It's a nice encoding. It also has multiple problems:
 . The instance's ID is always relative to other instances within the parent array; it has no absolute address.
 . There is no place to stash metadata, including which IFC version is being encoded.
 . IFC type parameters (e.g., IFCRATIOMEASURE) are lost in translation.
-. There are no schema annotations, including property names or type hints (i.e., is this element a literal or an object reference)
+. There are no schema annotations, including property names or type hints (i.e., is this element a literal or an Entity reference)
 
 What changes would need to be made to the encoding to fix this?
 
 . We'd want to give instances, and their parts, distinct addresses so they could be referenced from anywhere.
-. We'd want to be able to add metadata to any object, especially to qualify the values we're encoded (e.g. against a particular schema or asset version).
+. We'd want to be able to add metadata to any Entity, especially to qualify the values we're encoded (e.g. against a particular schema or asset version).
 . We'd want type parameters to be preserved for IFC compatibility and annotation of values.
 . We'd want to reintroduce property names from the schema, along with conventions for identifying the type of an attribute.
 
@@ -332,15 +334,15 @@ Fixing these problems resolves to something that looks very much like IFC-LD. We
 
 https://json-schema.org/[JSON Schema] is primarily useful for validating the _syntactic_ structure of JSON documents. It can ensure a JSON document has a specific set of field names, arrays of a certain size, or numeric values within a particular range. It is challenged, however, to define constraint rules that are deeply relational (graph-like), or to handle constraint checking when the input data can come in different "shapes". Unfortunately, both of these qualities are core to the structure of IFC-LD. 
 
-SHACL avoids JSON Schema's limitations here because it defines a graph-based constraint language that's independent of the serialization. It allows complex constraint definitions that traverse multiple objects, or members of a specific class of objects, and works no matter how the data is encoded - XML, JSON-LD, Turtle, etc. This does make the schema definition language more complex, but many industry rulesets inherently require this complexity for validation. 
+SHACL avoids JSON Schema's limitations here because it defines a graph-based constraint language that's independent of the serialization. It allows complex constraint definitions that traverse multiple Entities, or members of a specific class of Entities, and works no matter how the data is encoded - XML, JSON-LD, Turtle, etc. This does make the schema definition language more complex, but many industry rulesets inherently require this complexity for validation. 
 
-SHACL is the default recommended schema language for IFC-LD simply because it provides the greatest flexibility to the widest number of stakeholders. The heuristic to apply SHACL shape definitions to IFC-LD Slots intends to simplify and standardize the schema extension workflow.
+SHACL is the default recommended schema language for IFC-LD simply because it provides the greatest flexibility to the widest number of stakeholders. The heuristic to apply SHACL shape definitions to IFC-LD Components intends to simplify and standardize the schema extension workflow.
 
-The use of SHACL does not preclude the use of JSON Schema for validating specific parts of IFC-LD. In fact, the <<OpenAPI Specification>> depends on JSON Schema to check the structure of Packages, Objects, and Slots. Users are encouraged to expand these validation definitions for their use cases as needed. 
+The use of SHACL does not preclude the use of JSON Schema for validating specific parts of IFC-LD. In fact, the <<OpenAPI Specification>> depends on JSON Schema to check the structure of Packages, Entitys, and Components. Users are encouraged to expand these validation definitions for their use cases as needed. 
 
-==== Why are legacy IFC Slots @types defined by offset, instead of by name?
+==== Why are legacy IFC Components @types defined by offset, instead of by name?
 
-Legacy IFC Slots have URIs that are based on an attribute's offset within a P21 instance, rather than its name in the corresponding EXPRESS schema. For example, the type of the fourth attribute of an IFC4 Person is identified by the https://en.wikipedia.org/wiki/CURIE[curie] `ifc4:person/4`, rather than `ifc4:person/middlename`. Tying the URI to the attribute name requires any translation pipeline somehow be aware of the schema the instances model, because P21 files do not include attribute name information. The <<Proof-of-Concept Transformation Pipeline>> does this through a data enrichment step. Should the schema version not be known to the pipeline, or no enrichment data be available, a translation pipeline would have no way to know how to encode the attribute type URI. Identifying the attribute URI by offset, which is guaranteed to be known, ensures graceful degradation in the event an unknown schema is encountered. As a side effect, it means IFC-LD technically works with _all_ P21 files, even those unrelated to IFC. 
+Legacy IFC Components have URIs that are based on an attribute's offset within a P21 instance, rather than its name in the corresponding EXPRESS schema. For example, the type of the fourth attribute of an IFC4 Person is identified by the https://en.wikipedia.org/wiki/CURIE[curie] `ifc4:person/4`, rather than `ifc4:person/middlename`. Tying the URI to the attribute name requires any translation pipeline somehow be aware of the schema the instances model, because P21 files do not include attribute name information. The <<Proof-of-Concept Transformation Pipeline>> does this through a data enrichment step. Should the schema version not be known to the pipeline, or no enrichment data be available, a translation pipeline would have no way to know how to encode the attribute type URI. Identifying the attribute URI by offset, which is guaranteed to be known, ensures graceful degradation in the event an unknown schema is encountered. As a side effect, it means IFC-LD technically works with _all_ P21 files, even those unrelated to IFC. 
 
 ==== How does IFC-LD compare to ifcOWL?
 
@@ -352,16 +354,16 @@ IFC-LD is Like https://technical.buildingsmart.org/standards/ifc/ifc-formats/ifc
 IFC-ID differs from ifcOWL in that it does not:
 
 . make linked data support or comprehension a prerequisite for use
-. does not model EXPRESS schema concepts, but instead provides its own simple Package-Object-Slot metamodel
+. does not model EXPRESS schema concepts, but instead provides its own simple Package-Entity-Component metamodel
 . delegates most schema validation and inferencing to other specifications, especially SHACL
 . encourages use of "closed-world" schema validation over "open-world" inferencing, at least for common use cases
-. encourages the design of new types and definitions as needed through Slots
+. encourages the design of new types and definitions as needed through Components
 
 IFC-LD tries to package the power of linked data in a framework that's approachable, intuitive, and open-ended. 
 
 ==== How does IFC-LD compare to other industry linked data ontologies?
 
-There's been https://w3c-lbd-cg.github.io/lbd/[exciting work] on purpose-built industry linked data models over the last few years. Each of these model can be seen as a "module" describing one aspect of industry processes or structures. Being based on linked data, these modules are composable, but resolution of the resulting data is low-level: everything is a collection of (subject, predicate, object) triples. We believe this resolution is too granular for most industry use cases, especially those without linked data support. IFC-LD provides a more object-oriented definition of what a module is and allows any of those purpose-built data models to be plugged in as needed (e.g., via a Slot's _shortcut_). By analogy with electricity, IFC-LD defines the shape of a standard data socket, so anything fitting that socket can plug in. IFC-LD is effectively an higher-level abstraction and composition layer on top of these other models. 
+There's been https://w3c-lbd-cg.github.io/lbd/[exciting work] on purpose-built industry linked data models over the last few years. Each of these model can be seen as a "module" describing one aspect of industry processes or structures. Being based on linked data, these modules are composable, but resolution of the resulting data is low-level: everything is a collection of (subject, predicate, Entity) triples. We believe this resolution is too granular for most industry use cases, especially those without linked data support. IFC-LD provides a more Entity-oriented definition of what a module is and allows any of those purpose-built data models to be plugged in as needed (e.g., via a Component's _shortcut_). By analogy with electricity, IFC-LD defines the shape of a standard data socket, so anything fitting that socket can plug in. IFC-LD is effectively an higher-level abstraction and composition layer on top of these other models. 
 
 === Acknowledgements
 

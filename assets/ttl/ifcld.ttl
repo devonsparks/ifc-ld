@@ -12,32 +12,32 @@
     a rdfs:Class ;
     rdfs:subclassOf :Container .
 
-:Object
+:Entity
     a rdfs:Class ;
     rdfs:subclassOf :Container .
 
-:Slot
+:Component
     a rdfs:Class ;
     rdfs:subclassOf :Container .
 
-:slotof a rdf:Property ;
-    rdfs:domain :Slot ;
-    rdfs:range :Object .
+:componentof a rdf:Property ;
+    rdfs:domain :Component ;
+    rdfs:range :Entity .
 
-:slots a rdf:Property ;
-    rdfs:domain :Object ;
-    rdfs:range :Slot .
+:components a rdf:Property ;
+    rdfs:domain :Entity ;
+    rdfs:range :Component .
 
 :shortcut a rdf:Property ;
-    rdfs:domain :Slot .
+    rdfs:domain :Component .
 
-:objectof a rdf:Property ;
-    rdfs:domain :Object ;
+:entityof a rdf:Property ;
+    rdfs:domain :Entity ;
     rdfs:range :Package .
 
-:objects a rdf:Property ;
+:entities a rdf:Property ;
     rdfs:domain :Package ;
-    rdfs:range :Object .
+    rdfs:range :Entity .
 
 :who a rdf:Property ;
     rdfs:subPropertyOf prov:wasAttributedTo .

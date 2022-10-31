@@ -24,7 +24,7 @@
                             "objects": {
                                 "type": "object",
                                 "additionalProperties": {
-                                    "$ref": "#/components/schemas/Object"
+                                    "$ref": "#/components/schemas/Entity"
                                 }
                             }
                         },
@@ -80,7 +80,7 @@
                     "@context"
                 ]
             },
-            "Asset": {
+            "Container": {
                 "allOf": [
                     {
                         "$ref": "#/components/schemas/Identifiable"
@@ -98,31 +98,31 @@
                     }
                 ]
             },
-            "Object": {
+            "Entity": {
                 "allOf": [
                     {
-                        "$ref": "#/components/schemas/Asset"
+                        "$ref": "#/components/schemas/Container"
                     },
                     {
                         "type": "object",
                         "properties": {
-                            "objectof": {
+                            "entityof": {
                                 "type": "string"
                             },
-                            "slots": {
+                            "components": {
                                 "type": "object",
                                 "additionalProperties": {
-                                    "$ref": "#/components/schemas/Slot"
+                                    "$ref": "#/components/schemas/Component"
                                 }
                             }
                         },
                         "required": [
-                            "objectof"
+                            "entityof"
                         ]
                     }
                 ]
             },
-            "Slot": {
+            "Component": {
                 "allOf": [
                     {
                         "$ref": "#/components/schemas/Asset"
@@ -130,7 +130,7 @@
                     {
                         "type": "object",
                         "properties": {
-                            "slotof": {
+                            "componentof": {
                                 "type": "string"
                             },
                             "body": {
@@ -146,7 +146,7 @@
                         },
                         "required": [
                             "body",
-                            "slotof"
+                            "componentof"
                         ]
                     }
                 ]
@@ -172,9 +172,6 @@
                                     },
                                     {
                                         "type": "boolean"
-                                    },
-                                    {
-                                        "type": "null"
                                     }
                                 ]
                             }
