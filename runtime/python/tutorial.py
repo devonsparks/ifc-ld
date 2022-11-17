@@ -39,18 +39,18 @@ their bindings.
 Example:
 
 
-                    EC1
-                    ┌─────┬─────┐
-                    │color│ red │
-                    └────▲└─────┘
-                         │
-                         │
-                         │
-                         │
-    EC2                  │         EC3
-    ┌─────┬─────┬────────┴────────┬──────┬──────┐
-    │size │large│                 │color │green │
-    └─────┴─────┘                 └──────┴──────┘
+					EC1
+					┌─────┬─────┐
+					│color│ red │
+					└────▲└─────┘
+						 │
+						 │
+						 │
+						 │
+	EC2                  │         EC3
+	┌─────┬─────┬────────┴────────┬──────┬──────┐
+	│size │large│                 │color │green │
+	└─────┴─────┘                 └──────┴──────┘
 
 EC1 defines {"color":"red"}. EC2 and EC3 are forks of EC1, each with their own id. 
 EC2.get("color") returns "red" because the key "color" is found in its parent.
@@ -125,15 +125,15 @@ list of linked ECs on the key.
 
 
 
-                                a_wall
-    wall_building_decomp           ▲
-    ┌─────────────┬────┐           │
-    │describes    │    ├───────────┘
-    ├─────────────┼────┤
-    │decomposes   │    ├───────────┐
-    └─────────────┴────┘           │
-                                   ▼
-                               a_building
+								a_wall
+	wall_building_decomp           ▲
+	┌─────────────┬────┐           │
+	│describes    │    ├───────────┘
+	├─────────────┼────┤
+	│decomposes   │    ├───────────┐
+	└─────────────┴────┘           │
+								   ▼
+							   a_building
 
 
 """
@@ -158,28 +158,28 @@ all linked ECs.
 
 >>> print(json.dumps(ec3.snapshot()), indent=4)
 {
-    "@context": {
-        "id": "44f292f6-156d-4086-9c58-e0651c8056c7",
-        "color": {
-            "@id": "https://schema.org/color",
-            "@type": "xsd:string",
-            "id": "3fa63abf-710a-4377-87d9-ed9b2611e939"
-        }
-    },
-    "color": "green",
-    "*": {
-        "id": "06162471-4e4e-493c-b4d0-a456ab154bbe",
-        "@context": {
-            "id": "44f292f6-156d-4086-9c58-e0651c8056c7",
-            "color": {
-                "@id": "https://schema.org/color",
-                "@type": "xsd:string",
-                "id": "3fa63abf-710a-4377-87d9-ed9b2611e939"
-            }
-        },
-        "color": "red"
-    },
-    "id": "f5cebca3-3337-4637-8a7f-c6bb63b7abe6"
+	"@context": {
+		"id": "44f292f6-156d-4086-9c58-e0651c8056c7",
+		"color": {
+			"@id": "https://schema.org/color",
+			"@type": "xsd:string",
+			"id": "3fa63abf-710a-4377-87d9-ed9b2611e939"
+		}
+	},
+	"color": "green",
+	"*": {
+		"id": "06162471-4e4e-493c-b4d0-a456ab154bbe",
+		"@context": {
+			"id": "44f292f6-156d-4086-9c58-e0651c8056c7",
+			"color": {
+				"@id": "https://schema.org/color",
+				"@type": "xsd:string",
+				"id": "3fa63abf-710a-4377-87d9-ed9b2611e939"
+			}
+		},
+		"color": "red"
+	},
+	"id": "f5cebca3-3337-4637-8a7f-c6bb63b7abe6"
 }
 
 """

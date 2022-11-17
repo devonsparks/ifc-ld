@@ -1,5 +1,3 @@
-
-
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
 from uuid import uuid4
@@ -9,15 +7,15 @@ from abc import abstractmethod
 import inspect
 
 class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+	HEADER = '\033[95m'
+	OKBLUE = '\033[94m'
+	OKCYAN = '\033[96m'
+	OKGREEN = '\033[92m'
+	WARNING = '\033[93m'
+	FAIL = '\033[91m'
+	ENDC = '\033[0m'
+	BOLD = '\033[1m'
+	UNDERLINE = '\033[4m'
 
 def warn(msg):
 	print(f"{bcolors.WARNING}Warning:{bcolors.ENDC} %s"%msg)
@@ -26,7 +24,7 @@ def warn(msg):
 class Repository:
 	"""
 	A Repository represents a backing store for a collection of ECs.
-
+ 
 	Concrete subclasses implement the core methods of Repository, which
 	intentionally mirror standard HTTP verbs, including idempotency expectations.
 	"""
