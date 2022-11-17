@@ -41,7 +41,7 @@ Example:
 
                        EC1
                        ┌─────┬─────┐
-                       │color│redge│
+                       │color│red  │
                        └─────▲─────┘
                              │
                              │
