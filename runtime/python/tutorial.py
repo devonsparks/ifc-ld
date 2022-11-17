@@ -39,18 +39,20 @@ their bindings.
 Example:
 
 
-					EC1
-					┌─────┬─────┐
-					│color│ red │
-					└────▲└─────┘
-						 │
-						 │
-						 │
-						 │
-	EC2                  │         EC3
-	┌─────┬─────┬────────┴────────┬──────┬──────┐
-	│size │large│                 │color │green │
-	└─────┴─────┘                 └──────┴──────┘
+                       EC1
+                       ┌─────┬─────┐
+                       │color│redge│
+                       └─────▲─────┘
+                             │
+                             │
+                             │
+        EC2                  │         EC3
+        ┌─────┬─────┬────────┴────────┬──────┬──────┐
+        │size │large│                 │color │green │
+        └─────┴─────┘                 └──────┴──────┘
+
+
+
 
 EC1 defines {"color":"red"}. EC2 and EC3 are forks of EC1, each with their own id. 
 EC2.get("color") returns "red" because the key "color" is found in its parent.
@@ -124,17 +126,15 @@ where value is another EC. Calling let(key, EC) on the same key multiple times w
 list of linked ECs on the key. 
 
 
-
-								a_wall
-	wall_building_decomp           ▲
-	┌─────────────┬────┐           │
-	│describes    │    ├───────────┘
-	├─────────────┼────┤
-	│decomposes   │    ├───────────┐
-	└─────────────┴────┘           │
-								   ▼
-							   a_building
-
+                                    a_wall
+        wall_building_decomp           ▲
+        ┌─────────────┬────┐           │
+        │describes    │    ├───────────┘
+        ├─────────────┼────┤
+        │decomposes   │    ├───────────┐
+        └─────────────┴────┘           │
+                                       ▼
+                                   a_building
 
 """
 RelDecomposes = Component.fork().declare("isdecomposedby", "ifc5:isdecomposedby").declare("decomposes", "ifc5:decomposes")
