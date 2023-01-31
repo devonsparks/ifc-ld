@@ -1,0 +1,24 @@
+version: '3.8'
+services:
+  web:
+    build: .
+    ports: 
+      - "8002:8002"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+  db:
+    image: "postgres:14.5"
+    restart: always
+    environment:
+        - POSTGRES_USER
+        - POSTGRES_PASSWORD
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+      
