@@ -1,0 +1,66 @@
+{% extends "container.template.html" %}
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col d-flex justify-content-center mt-5">
+      <div class="card border border-primary">
+        <div class="card-body">
+          {% set invalid_keys = ["_sa_instance_state", "component_assignments", "property_assignments"] %}
+          {% for key, value in resource.items() %}
+          {% if key not in invalid_keys %}
+          <dl class="row">
+            <dt class="col-sm-3">{{key}}</dt>
+            <dd class="col-sm-9">{{value}}</dd>
+          </dl>
+          {% endif %}
+          {% endfor %}
+        </div>
+
+        <div class="container mt-5">
+          <div class="row">
+            <h5>Related</h5>
+          </div>
+
+          {% if props %}
+          <div class="row mt-5">
+            <h6>Properties</h6>
+          </div>
+          <ul class="list-group list-group-flush">
+            {% for prop in props %}
+            <li class="list-group-item"><a href={{ "/properties?id=%s" % prop.id }}>{{prop.title}}</a></li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+
+          {% if comps %}
+          <div class="row mt-5">
+            <h6>Components</h6>
+          </div>
+          <ul class="list-group list-group-flush">
+            {% for comp in comps %}
+            <li class="list-group-item"><a href={{ "/components?id=%s" % comp.id }}>{{comp.title}}</a></li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+
+          {% if types %}
+          <div class="row mt-5">
+            <h6>Types</h6>
+          </div>
+          <ul class="list-group list-group-flush">
+            {% for type in types %}
+            <li class="list-group-item"><a href={{ "/types?id=%s" % type.id }}>{{type.title}}</a></li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+  
+
+
+  {% endblock %}

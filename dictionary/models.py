@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: © 2023 Devon D. Sparks <devonsparks.com>
+# SPDX-License-Identifier: MIT
+
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, CheckConstraint
 from sqlalchemy_utils import URLType
 from sqlalchemy.orm import relationship

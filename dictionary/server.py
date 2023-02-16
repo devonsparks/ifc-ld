@@ -19,7 +19,8 @@ def mime_types():
                 'application/json': {},
                 'application/shacl+json': {},
                 'application/ld+json': {},
-                'application/schema+json': {}
+                'application/schema+json': {},
+                'text/html': {}
             },
         }
     }
@@ -42,7 +43,7 @@ def get(type, db: Session, req: Request, id):
     obj = db.query(type).get(id)
     if not obj:
         return HTTPException(status_code=404)
-    return present(obj, req.headers.get("content-type"))
+    return present(obj, req.headers.get("accept"))
 
 
 def set(type, db: Session, req: Request, dto: dtos.Base):
@@ -106,9 +107,8 @@ def get_type_assignment(req: Request, type_id: AnyUrl, component_id: AnyUrl, db:
 def put_type_assignment(req: Request, dto: dtos.ComponentTypeAssignment, db: Session = Depends(get_db)):
     return set(ComponentTypeAssignment, db, req, dto)
 
-"""
+
 @app.on_event("startup")
 def startup():
     from init import init
     init(next(get_db()))
-"""
