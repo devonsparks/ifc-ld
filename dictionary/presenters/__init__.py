@@ -12,8 +12,10 @@ class Presenter(abc.ABC):
             return cls.present_property(object)
         elif isinstance(object, Component):
             return cls.present_component(object)
-        elif isinstance(object, Type):
-            return cls.present_type(object)
+        elif isinstance(object, State):
+            return cls.present_state(object)
+        elif isinstance(object, dict):
+            return cls.present_index(object)
         else:
             raise Exception("Unknown type {type} to present.".format(type=type(object)))
         
@@ -25,10 +27,15 @@ class Presenter(abc.ABC):
     def present_component(cls, comp : Component):
         pass
 
+
     @abc.abstractclassmethod
-    def present_type(cls, type : Type):
+    def present_state(cls, state : State):
         pass
     
+    @abc.abstractclassmethod
+    def present_index(cls, object : dict):
+        pass
+
     @classmethod
     def all(cls):
         for subclass in cls.__subclasses__():
@@ -36,10 +43,10 @@ class Presenter(abc.ABC):
             yield subclass
 
 
-from .jsonld import JSONLDPresenter
-from .jsonschema import JSONSchemaPresenter
+#from .jsonld import JSONLDPresenter
+#from .jsonschema import JSONSchemaPresenter
 from .html import HTMLPresenter
-from .shacl import SHACLPresenter
+#from .shacl import SHACLPresenter
 from fastapi.responses import HTMLResponse
 def present(object, accept):
     """
@@ -50,13 +57,13 @@ def present(object, accept):
     """
     #FIXME Order is arbitrary; should go in order of accept
     mimes = accept.split(",")
-    if JSONLDPresenter.Mimetype in mimes:
-        return JSONLDPresenter.present(object)
-    elif JSONSchemaPresenter.Mimetype in mimes:
-        return JSONSchemaPresenter.present(object)
-    elif SHACLPresenter.Mimetype in mimes:
-        return SHACLPresenter.present(object)
-    elif HTMLPresenter.Mimetype in mimes:
+    #if JSONLDPresenter.Mimetype in mimes:
+    #    return JSONLDPresenter.present(object)
+    #elif JSONSchemaPresenter.Mimetype in mimes:
+    #    return JSONSchemaPresenter.present(object)
+    #elif SHACLPresenter.Mimetype in mimes:
+     #   return SHACLPresenter.present(object)
+    if HTMLPresenter.Mimetype in mimes:
         return HTMLResponse(content=HTMLPresenter.present(object))
     else:
         return object

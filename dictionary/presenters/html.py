@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: © 2023 Devon D. Sparks <devonsparks.com>
 # SPDX-License-Identifier: MIT
 
-from . import Presenter, Type, Component, Property
+from . import Presenter, Component, Property, State
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 
@@ -12,27 +12,23 @@ class HTMLPresenter(Presenter):
         autoescape=select_autoescape())
 
     @classmethod
+    def present_item(cls, item):
+        type_map = {"Property":"properties", "Component":"components", "State":"states"}
+        return cls.Env.get_template("item.template.html").render(item = item, type_map=type_map)
+
+    @classmethod
     def present_property(cls, prop : Property):
-        types = set()
-        comps = set()
-        for assignment in prop.component_assignments:
-            for superassigment in assignment.component.type_assignments:
-                types.add(superassigment.type)
-                comps.add(assignment.component)
-        return cls.Env.get_template("resource.template.html").render(resource = prop.__dict__, types=types, comps=comps)
+        return cls.present_item(prop)
 
     @classmethod
     def present_component(cls, comp : Component):
-        return cls.Env.get_template("resource.template.html").render(resource = comp.__dict__)
+        return cls.present_item(comp)
+    @classmethod
+    def present_state(cls, state : State):
+        return cls.present_item(state)
 
     @classmethod
-    def present_type(cls, type : Type):
-        types = set([type])
-        comps = set()
-        props = set()
-        for assignment in type.component_assignments:
-            for subassigment in assignment.component.property_assignments:
-                comps.add(assignment.component)
-                props.add(subassigment.property)
-        return cls.Env.get_template("resource.template.html").render(resource = type.__dict__, comps=comps, props=props)
-
+    def present_index(cls, index: dict):
+        return cls.Env.get_template("index.template.html").render(properties = index["properties"],
+                                                                  components = index["components"],
+                                                                  states = index["states"])

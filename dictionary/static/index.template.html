@@ -1,0 +1,98 @@
+{% extends "container.template.html" %}
+{% block content %}
+<div class="container">
+  <div class="row">
+
+   
+
+    {% if properties %}
+      <caption>Properties</caption>
+      <table class="table">
+          <colgroup>
+            <col class="col-md-7">
+            <col class="col-md-4">
+        </colgroup>
+          <thead>
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">URI</th>
+              <th scope="col">Title</th>
+            </tr>
+          </thead>
+          <tbody>
+              {% for prop in properties %}
+              <tr>
+              <th scope="row">{{prop.id}}</th>
+              <td><a href="{{'/properties/{id}'.format(id=prop.id)}}">{{prop.uri}}</a></td>
+              <td>{{prop.title}}</td>
+              </tr>
+              {% endfor %}
+              
+          </tbody>
+      </table>
+    {% endif %}
+
+    {% if components %}
+      <caption>Components</caption>
+      <table class="table">
+        <colgroup>
+          <col class="col-md-7">
+          <col class="col-md-4">
+      </colgroup>
+          <thead>
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">URI</th>
+              <th scope="col">Title</th>
+            </tr>
+          </thead>
+          <tbody>
+              {% for comp in components %}
+              <tr>
+              <th scope="row">{{comp.id}}</th>
+              <td><a href="{{'/components/{id}'.format(id=comp.id)}}">{{comp.uri}}</a></td>
+              <td>{{comp.title}}</td>
+              </tr>
+              {% endfor %}
+              
+          </tbody>
+      </table>
+    {% endif %}
+
+    {% if states %}
+      <caption>States</caption>
+      <table class="table">
+        <colgroup>
+          <col class="col-md-7">
+          <col class="col-md-4">
+      </colgroup>
+          <thead>
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">URI</th>
+              <th scope="col">Title</th>
+            </tr>
+          </thead>
+          <tbody>
+              {% for state in states %}
+              <tr>
+              <th scope="row">{{state.id}}</th>
+              <td><a href="{{'/states/{id}'.format(id=state.id)}}">{{state.uri}}</a></td>
+              <td>{{state.title}}</td>
+              </tr>
+              {% endfor %}
+              
+          </tbody>
+      </table>
+    {% endif %}
+
+   
+   
+ </div>
+</div>
+
+
+  
+
+
+  {% endblock %}

@@ -82,3 +82,4 @@ webencodings==0.5.1
 xeger==0.3.5
 zeep==4.1.0
 zipp==3.8.1
+uuid7==0.1.0

@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: © 2023 Devon D. Sparks <devonsparks.com>
 # SPDX-License-Identifier: MIT
 
-from . import Presenter, Type, Component, Property
+from . import Presenter, Model, Component, Property
 from .jsonschema import JSONSchemaPresenter
 import jsonschema_default
 

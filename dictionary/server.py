@@ -2,15 +2,18 @@
 # SPDX-License-Identifier: MIT
 
 from fastapi import FastAPI, Request, HTTPException, Depends
-from fastapi.responses import JSONResponse
+from fastapi.logger import logger
+from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import AnyUrl
+from sqlalchemy.orm.collections import InstrumentedList
 from sqlalchemy.orm import Session
-from models import Property, Component, Type, PropertyComponentAssignment, ComponentTypeAssignment
-from presenters import present
+from models import Property, Component, State, Item
+
 from database import Base, engine, get_db
 import dtos
 
+from presenters import present
 
 def mime_types():
     return {
@@ -41,9 +44,7 @@ def get_application():
 
 def get(type, db: Session, req: Request, id):
     obj = db.query(type).get(id)
-    if not obj:
-        return HTTPException(status_code=404)
-    return present(obj, req.headers.get("accept"))
+    
 
 
 def set(type, db: Session, req: Request, dto: dtos.Base):
@@ -54,59 +55,63 @@ def set(type, db: Session, req: Request, dto: dtos.Base):
 
 
 app = get_application()
+type_map = {"properties":Property, "components":Component, "states":State}
+
+# TODO: replace with Enum classes: https://fastapi.tiangolo.com/sq/tutorial/path-params/#predefined-values
+supported_links = {"properties":["pred", "succ", "prev", "next", "components", "states"], 
+                   "components":["pred", "succ", "prev", "next", "properties", "states"], 
+                   "states":["pred", "succ", "prev", "next", "properties", "components"]
+                  
+}
+def check_type(db, type):
+    if type not in type_map:
+        raise HTTPException(status_code=404, detail="Type '{type}' not supported.".format(type=type))
+
+def check_id(db, type, id):
+    check_type(db, type)
+    if not db.get(type_map[type], id):
+        raise HTTPException(status_code=404, detail="No ID '{id}' found in '{type}' dictionary.".format(type=type, id=id))
+
+def check_link(db, type, id, link):
+    check_id(db, type, id)
+    if link not in supported_links[type]:
+        raise HTTPException(status_code=404, detail="Link '{link}' not supported on '{type}'".format(link=link, type=type))
+
+@app.get("/")
+def get_type(req: Request, db: Session = Depends(get_db)):
+    index = {}
+    index["properties"] = db.query(Property).order_by(Property.id.desc()).all()
+    index["components"] = db.query(Component).order_by(Component.id.desc()).all()
+    index["states"] = db.query(State).order_by(State.id.desc()).all()
+    return present(index, req.headers.get("accept"))
 
 
-@app.get("/properties", responses=mime_types())
-def get_property_definition(req: Request, id: AnyUrl, db: Session = Depends(get_db)):
-    return get(Property, db, req, id)
+@app.get("/{type}")
+def get_type(req: Request, type : str,  db: Session = Depends(get_db)):
+    check_type(db, type)
+    top = type_map[type].top(db)
+    return RedirectResponse("/{type}/{id}".format(type=type,id=top.id))
 
 
-@app.put("/properties")
-def put_property_definition(req: Request, dto: dtos.Property, db: Session = Depends(get_db)):
-    return set(Property, db, req, dto)
+@app.get("/{type}/{id}")
+def get_id(req: Request, type : str, id : int, db: Session = Depends(get_db)):
+    item = type_map[type].get(db, id)
+    if not item:
+        raise HTTPException(status_code=404, detail="ID {id} of type {type} not found".format(type=type, id=id))
+    return present(item, req.headers.get("accept"))
 
 
-@app.get("/components", responses=mime_types())
-def get_component_definition(req: Request, id: AnyUrl, db: Session = Depends(get_db)):
-    return get(Component, db, req, id)
-
-
-@app.put("/components")
-def put_component_definition(req: Request, dto: dtos.Component, db: Session = Depends(get_db)):
-    return set(Component, db, req, dto)
-
-
-@app.get("/components/assignments", responses=mime_types())
-def get_component_assignment(req: Request, component_id: AnyUrl, property_id: AnyUrl, db: Session = Depends(get_db)):
-    return db.query(PropertyComponentAssignment).filter(PropertyComponentAssignment.component_id == component_id,
-                                                        PropertyComponentAssignment.property_id == property_id)
-
-
-@app.put("/components/assignments")
-def put_component_assignment(req: Request, dto: dtos.PropertyComponentAssignment, db: Session = Depends(get_db)):
-    return set(PropertyComponentAssignment, db, req, dto)
-
-
-@app.get("/types", responses=mime_types())
-def get_type_definition(req: Request, id: AnyUrl, db: Session = Depends(get_db)):
-    return get(Type, db, req, id)
-
-
-@app.put("/types")
-def put_type_definition(req: Request, dto: dtos.Component, db: Session = Depends(get_db)):
-    return set(Type, db, req, dto)
-
-
-@app.get("/types/assignments", responses=mime_types())
-def get_type_assignment(req: Request, type_id: AnyUrl, component_id: AnyUrl, db: Session = Depends(get_db)):
-    return db.query(ComponentTypeAssignment).filter(ComponentTypeAssignment.component_id == component_id,
-                                                    ComponentTypeAssignment.type_id == type_id)
-
-
-@app.put("/components/assignments")
-def put_type_assignment(req: Request, dto: dtos.ComponentTypeAssignment, db: Session = Depends(get_db)):
-    return set(ComponentTypeAssignment, db, req, dto)
-
+@app.get("/{type}/{id}/{link}")
+def getter_link(req: Request, type : str, id : int, link : str,  db: Session = Depends(get_db)):
+    check_link(db, type, id, link)
+    next = getattr(type_map[type].get(db, id), link)
+    if next == None:
+        raise HTTPException(status_code=404, detail="No link '{link}' available on {type} ID '{id}'".format(link=link, type=type, id=id))
+    elif isinstance(next, InstrumentedList):
+        return next
+    else:
+        return RedirectResponse("/{type}/{id}".format(type=type,id=next.id))
+        
 
 @app.on_event("startup")
 def startup():

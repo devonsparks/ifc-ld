@@ -1,0 +1,104 @@
+{% extends "container.template.html" %}
+
+{% macro related(item, related_type, relation, caption, icon) %}
+{% if item[relation] %}
+<div class="container mt-5">
+    <caption><span class="bi-{{icon}} me-1"></span>{{caption}}</caption>
+    <table class="table">
+        <colgroup>
+            <col class="col-md-7">
+            <col class="col-md-4">
+        </colgroup>
+        <thead>
+            <tr>
+                <th scope="col">URI</th>
+                <th scope="col">Title</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            {% for related in item[relation] %}
+            <tr>
+                <td><a href="{{'/{type}/{id}'.format(type=related_type, id=related.id) }}">{{related.uri}}</a></td>
+                <td>{{related.title}}</td>
+            </tr>
+            {% endfor %}
+
+        </tbody>
+    </table>
+</div>
+{% endif %}
+{%- endmacro %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col d-flex justify-content-center mt-5">
+            <div class="card border">
+                <h3 class="card-header">{{item.type}}</h3>
+                <div class="card-body">
+                    <a href="{{ '/{type}/{id}'.format(type=type_map[item.type],id=item.pred.id) if item.pred else '#' }}"
+                        class="btn btn-link btn-sm float-start me-1 {{'disabled' if not item.pred}}"
+                        role="button">&larr; last version</a>
+                    <span class="col-sm-3"></span>
+                    <a href="{{'/{type}/{id}'.format(type=type_map[item.type],id=item.succ.id) if item.succ else '#'}}"
+                        class="btn btn-link btn-sm float-end ms-1 {{'disabled' if not item.succ}}" role="button">next
+                        version &rarr;</a>
+                </div>
+                <div class="card-body">
+
+                    <!--<p class="card-text">{{item.description}}</p>-->
+
+                    <div class="container">
+                        <dl class="row">
+
+                            <dt class="col-sm-3">URI</dt>
+                            <dd class="col-sm-9">{{item.uri}}</dd>
+
+                            <dt class="col-sm-3">ID</dt>
+                            <dd class="col-sm-9">{{item.id}}</dd>
+
+                            <dt class="col-sm-3">Title</dt>
+                            <dd class="col-sm-9">{{item.title}}</dd>
+                        </dl>
+                    </div>
+
+
+                    {{ related(item, "components", "subcomponents", "Subcomponents", "") }}
+
+                    {{ related(item, "components", "subComponentOf", "Subcomponent Of", "") }}
+
+                    {{ related(item, "properties", "properties", "Related Properties", "") }}
+
+                    {{ related(item, "components", "components", "Related Components", "") }}
+
+                    {{ related(item, "states", "states", "Related States", "") }}
+
+
+                    <div class="container mt-5">
+                        <span class="bi-files me-1"></span><label for="format-select" class="form-label">Serializations</label>
+                        <div class="input-group">
+                            <select class="form-select disabled" id="format-select" aria-label="Available Formats">
+                                <option value="1">JSON Schema</option>
+                                <option value="2">JSON-LD</option>
+                                <option value="3">*EXPRESS</option>
+                            </select>
+
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button" tabindex="-1">
+                                    <span class="bi-download"></span>
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+
+                </div> <!-- end card-body-->
+
+            </div>
+        </div>
+
+
+
+
+
+        {% endblock %}

@@ -7,9 +7,9 @@ from sqlalchemy.orm import sessionmaker
 import os
 
 DATABASE_URL = "postgresql+psycopg2://{db_login}:{db_password}@db:5432/postgres".\
-    format(db_login=os.environ["POSTGRES_USER"], db_password=os.environ["POSTGRES_PASSWORD"])
+    format(db_login=os.environ.get("POSTGRES_USER"), db_password=os.environ.get("POSTGRES_PASSWORD"))
 
-engine = create_engine(DATABASE_URL, echo=True)
+engine = create_engine(DATABASE_URL, echo=False)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
