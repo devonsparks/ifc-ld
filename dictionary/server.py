@@ -8,10 +8,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import AnyUrl
 from sqlalchemy.orm.collections import InstrumentedList
 from sqlalchemy.orm import Session
-from models import Property, Component, State, Item
+from typing import Union
+from models import Property, Component, State
+from models import StateComponentRelation, StatePropertyRelation, ComponentPropertyRelation, ComponentComponentRelation
 
 from database import Base, engine, get_db
 import dtos
+from enum import Enum
 
 from presenters import present
 
@@ -55,7 +58,30 @@ def set(type, db: Session, req: Request, dto: dtos.Base):
 
 
 app = get_application()
-type_map = {"properties":Property, "components":Component, "states":State}
+
+class TypeName(str, Enum):
+    Property = "properties"
+    Component = "components"
+    State = "states"
+
+class ContentTypes(str, Enum):
+    JSONSchema = "application/schema+json"
+    SHACL = "application/shacl+json"
+    JSONLD = "application/ld+json"
+    HTML = "text/html"
+
+TypeMap = {"properties":Property, "components":Component, "states":State}
+
+
+class StdLink(str, Enum):
+    Predecessor = "pred"
+    Successor = "succ"
+    Previous = "prev"
+    Next = "next"
+
+
+
+
 
 # TODO: replace with Enum classes: https://fastapi.tiangolo.com/sq/tutorial/path-params/#predefined-values
 supported_links = {"properties":["pred", "succ", "prev", "next", "components", "states"], 
@@ -63,19 +89,8 @@ supported_links = {"properties":["pred", "succ", "prev", "next", "components", "
                    "states":["pred", "succ", "prev", "next", "properties", "components"]
                   
 }
-def check_type(db, type):
-    if type not in type_map:
-        raise HTTPException(status_code=404, detail="Type '{type}' not supported.".format(type=type))
 
-def check_id(db, type, id):
-    check_type(db, type)
-    if not db.get(type_map[type], id):
-        raise HTTPException(status_code=404, detail="No ID '{id}' found in '{type}' dictionary.".format(type=type, id=id))
 
-def check_link(db, type, id, link):
-    check_id(db, type, id)
-    if link not in supported_links[type]:
-        raise HTTPException(status_code=404, detail="Link '{link}' not supported on '{type}'".format(link=link, type=type))
 
 @app.get("/")
 def get_type(req: Request, db: Session = Depends(get_db)):
@@ -86,34 +101,96 @@ def get_type(req: Request, db: Session = Depends(get_db)):
     return present(index, req.headers.get("accept"))
 
 
-@app.get("/{type}")
-def get_type(req: Request, type : str,  db: Session = Depends(get_db)):
-    check_type(db, type)
-    top = type_map[type].top(db)
-    return RedirectResponse("/{type}/{id}".format(type=type,id=top.id))
+@app.get("/{source_type}")
+def get_type(req: Request, source_type : TypeName, db: Session = Depends(get_db)):
+    return TypeMap[source_type].current(db)
+   
 
-
-@app.get("/{type}/{id}")
-def get_id(req: Request, type : str, id : int, db: Session = Depends(get_db)):
-    item = type_map[type].get(db, id)
+@app.get("/{source_type}/{id}")
+def get_id(req: Request, source_type : TypeName, id : str,  accept: Union[ContentTypes, None] = None, db: Session = Depends(get_db)):
+    item = TypeMap[source_type].get(db, id)
     if not item:
-        raise HTTPException(status_code=404, detail="ID {id} of type {type} not found".format(type=type, id=id))
-    return present(item, req.headers.get("accept"))
+        raise HTTPException(status_code=404, detail="ID {id} of type {type} not found".format(type=source_type, id=id))
+    return present(item, accept or req.headers.get("accept"))
 
 
-@app.get("/{type}/{id}/{link}")
-def getter_link(req: Request, type : str, id : int, link : str,  db: Session = Depends(get_db)):
-    check_link(db, type, id, link)
-    next = getattr(type_map[type].get(db, id), link)
-    if next == None:
-        raise HTTPException(status_code=404, detail="No link '{link}' available on {type} ID '{id}'".format(link=link, type=type, id=id))
-    elif isinstance(next, InstrumentedList):
-        return next
+@app.get("/{source_type}/{id}/{link_type}")
+def get_id(req: Request, source_type : TypeName, id : str, link_type : StdLink, db: Session = Depends(get_db)):
+    item = TypeMap[source_type].get(db, id)
+    if not item:
+        raise HTTPException(status_code=404, detail="ID {id} of type {type} not found".format(type=source_type, id=id))
+    target = getattr(item, link_type)
+    if target:
+        return RedirectResponse(url="/{source_type}/{id}".format(source_type=source_type, id = target.id))
     else:
-        return RedirectResponse("/{type}/{id}".format(type=type,id=next.id))
-        
+        raise HTTPException(status_code=404, detail="No object associated with {link_type} link".format(link_type = link_type))
+
+
+@app.get("/{source_type}/{id}/related/{target_type}", summary="Get all objects of a given type related to the source object.")
+def get_related(req: Request, source_type : TypeName, id : str, target_type : TypeName, db: Session = Depends(get_db)):
+    item = TypeMap[source_type].get(db, id)
+    if not item:
+        raise HTTPException(status_code=404, detail="Item with ID {id} not found.".format(id = id))
+    if target_type == "properties":
+        return item.related_properties
+    elif target_type == "components":
+        return item.related_components
+    elif target_type == "states":
+        return item.related_states
+    else:
+        raise HTTPException(status_code=404, detail="Related type {type} not recognized.".format(type=type))
+
+
+@app.get("/{source_type}/{id}/related/{target_type}/targets")
+def get_related(req: Request, source_type : TypeName, id : str, target_type : TypeName, db: Session = Depends(get_db)):
+    item = TypeMap[source_type].get(db, id)
+    if not item:
+        raise HTTPException(status_code=404, detail="Item with ID {id} not found.".format(id = id))
+    if source_type == "components" and target_type == "properties":
+        return db.query(Property).join(ComponentPropertyRelation).filter(ComponentPropertyRelation.source_id == item.id).all()
+    elif source_type == "properties" and target_type == "components":
+        return db.query(Component).join(ComponentPropertyRelation).filter(ComponentPropertyRelation.target_id == item.id).all()
+    elif source_type == "states" and target_type == "components":
+        return db.query(Component).join(StateComponentRelation).filter(StateComponentRelation.source_id == item.id).all()
+    elif source_type == "components" and target_type == "states":
+        return db.query(State).join(StateComponentRelation).filter(StateComponentRelation.target_id == item.id).all()
+    elif source_type == "states" and target_type == "properties":
+        return db.query(Property).join(StatePropertyRelation).filter(StatePropertyRelation.source_id == item.id).all()
+    elif source_type == "properties" and target_type == "states":
+         return db.query(State).join(StatePropertyRelation).filter(StatePropertyRelation.target_id == item.id).all()
+    else:
+        raise HTTPException(status_code=404, detail="Related type {type} not recognized.".format(type=type))
+
+@app.get("/{source_type}/{id}/related/{target_type}/{target_id}")
+def get_related_instance(req: Request, source_type : TypeName, id : str, target_type : TypeName,  target_id : str, db: Session = Depends(get_db)):
+    if source_type == "components" and target_type == "properties":
+        return ComponentPropertyRelation.get(db, id, target_id)
+    elif source_type == "properties" and target_type == "components":
+        return ComponentPropertyRelation.get(db, target_id, id)
+    elif source_type == "states" and target_type == "components":
+        return StateComponentRelation.get(db, id, target_id)
+    elif source_type == "components" and target_type == "states":
+        return StateComponentRelation.get(db, target_id, id)
+    elif source_type == "states" and target_type == "properties":
+        return StatePropertyRelation.get(db, id, target_id)
+    elif source_type == "properties" and target_type == "states":
+        return StatePropertyRelation.get(db, target_id, id)
+    else:
+        raise HTTPException(status_code=404, detail="Unknown relation type from {source_type} to {target_type}".format(source_type=source_type, target_type = target_type))
 
 @app.on_event("startup")
 def startup():
     from init import init
     init(next(get_db()))
+
+# /{source_type}/{source_id}/{rel}/{target_id}
+
+# GET /{source_type}
+# Get a Page of all current {source_type} instances
+
+# POST /{source_type}
+# Create a new instance of {source_type}
+
+# PUT /{source_type}
+
+# GET /{source_type}

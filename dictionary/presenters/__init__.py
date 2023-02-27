@@ -32,9 +32,6 @@ class Presenter(abc.ABC):
     def present_state(cls, state : State):
         pass
     
-    @abc.abstractclassmethod
-    def present_index(cls, object : dict):
-        pass
 
     @classmethod
     def all(cls):
@@ -43,27 +40,21 @@ class Presenter(abc.ABC):
             yield subclass
 
 
-#from .jsonld import JSONLDPresenter
-#from .jsonschema import JSONSchemaPresenter
+from .jsonld import JSONLDPresenter
+from .jsonschema import JSONSchemaPresenter
 from .html import HTMLPresenter
-#from .shacl import SHACLPresenter
-from fastapi.responses import HTMLResponse
+from .shacl import SHACLPresenter
+from fastapi.responses import HTMLResponse, JSONResponse
+
 def present(object, accept):
-    """
-    for presenter in Presenter.all():
-        if presenter.Mimetype == mimetype:
-            return presenter.present(object)
-    return object
-    """
-    #FIXME Order is arbitrary; should go in order of accept
     mimes = accept.split(",")
-    #if JSONLDPresenter.Mimetype in mimes:
-    #    return JSONLDPresenter.present(object)
-    #elif JSONSchemaPresenter.Mimetype in mimes:
-    #    return JSONSchemaPresenter.present(object)
-    #elif SHACLPresenter.Mimetype in mimes:
-     #   return SHACLPresenter.present(object)
-    if HTMLPresenter.Mimetype in mimes:
-        return HTMLResponse(content=HTMLPresenter.present(object))
-    else:
-        return object
+    for mime in mimes:
+        if mime == HTMLPresenter.Mimetype:
+            return HTMLResponse(content=HTMLPresenter.present(object))
+        elif mime == JSONSchemaPresenter.Mimetype:
+            return JSONResponse(content=JSONSchemaPresenter.present(object))
+        elif mime == JSONLDPresenter.Mimetype:
+            return JSONResponse(content=JSONLDPresenter.present(object))
+        elif mime == SHACLPresenter.Mimetype:
+            return JSONResponse(content=SHACLPresenter.present(object))
+    return object

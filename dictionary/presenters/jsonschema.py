@@ -1,54 +1,39 @@
 # SPDX-FileCopyrightText: © 2023 Devon D. Sparks <devonsparks.com>
 # SPDX-License-Identifier: MIT
 
-from . import Presenter, Type, Component, Property, StringProperty, ValueRangeProperty
+from . import Presenter, Component, Property, StringProperty, ValueRangeProperty
 
 class JSONSchemaPresenter(Presenter):
     Mimetype = "application/schema+json"
     Schema = "https://json-schema.org/draft/2019-09/schema"
-    @classmethod
-    def present_type(cls, t : Type):
-        json = {
-            "$schema": cls.Schema,
-            "$id":t.id,
-            "title":t.title,
-            "description":t.description,
-            "properties":{},
-            "required":[], 
-        }
-        for assignment in t.component_assignments:
-            json["properties"][assignment.key] = cls.present_component(assignment.component)
-            if assignment.required:
-                json["required"].append(assignment.key)
-        return json
+
 
     @classmethod 
-    def present_component(cls, c : Component):
+    def present_component(cls, comp : Component):
         json = {"type":"object", 
-                "title":c.title,
-                "description":c.description,
+                "title":comp.title,
+                "description":comp.description,
                 "properties":{}, 
                 "required":[]
                 }
-        json["$id"] = c.id
-        for assignment in c.property_assignments:
-            json["properties"][assignment.key] = cls.present_property(assignment.property)
-            if assignment.required:
-                json["required"].append(assignment.key)
+        json["$id"] = comp.id
+        for related_prop in comp.related_properties:
+            json["properties"][related_prop.target.title or related_prop.target.uri] = cls.present_property(related_prop.target)
+
         return json
 
     @classmethod
-    def present_property(cls, p : Property):
-        json = {"title":p.title,
-                "description":p.description
+    def present_property(cls, prop : Property):
+        json = {"title":prop.title,
+                "description":prop.description
                 }
 
-        if isinstance(p, StringProperty):
+        if isinstance(prop, StringProperty):
             json["type"] = "string"
-        elif isinstance(p, ValueRangeProperty):
+        elif isinstance(prop, ValueRangeProperty):
             json["type"] = "number"
-            json["minimum"] = p.minimum
-            json["maximum"] = p.maximum
+            json["minimum"] = prop.minimum
+            json["maximum"] = prop.maximum
         else:
             json["type"] = "string"
         return json

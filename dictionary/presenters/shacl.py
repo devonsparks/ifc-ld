@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: © 2023 Devon D. Sparks <devonsparks.com>
 # SPDX-License-Identifier: MIT
 
-from . import Presenter, Type, Component, Property
+from . import Presenter, Component, Property
 
 class SHACLPresenter(Presenter):
     Mimetype="application/shacl+json"
@@ -18,18 +18,8 @@ class SHACLPresenter(Presenter):
 
     @classmethod
     def present_component(cls, comp : Component):
-        json = []
-        for assignment in comp.property_assignments:
-            prop = cls.present_property(assignment.property)
-            prop["sh:group"] = comp.id
-            json.append(prop)
-        return json
-
-    @classmethod
-    def present_type(cls, type : Type):
         json = {"@type":"sh:NodeShape", 
                 "sh:property":[]}
-        for assignment in type.component_assignments:
-            for item in cls.present_component(assignment.component):
-                json["sh:property"].append(item)
+        for related_prop in comp.related_properties:
+                json["sh:property"].append(cls.present_property(related_prop.target))
         return json

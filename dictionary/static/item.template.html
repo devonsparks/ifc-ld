@@ -1,9 +1,9 @@
 {% extends "container.template.html" %}
 
-{% macro related(item, related_type, relation, caption, icon) %}
+{% macro related(item, relation, source_or_target, caption) %}
 {% if item[relation] %}
 <div class="container mt-5">
-    <caption><span class="bi-{{icon}} me-1"></span>{{caption}}</caption>
+    <caption><span class="me-1"></span>{{caption}}</caption>
     <table class="table">
         <colgroup>
             <col class="col-md-7">
@@ -19,8 +19,8 @@
 
             {% for related in item[relation] %}
             <tr>
-                <td><a href="{{'/{type}/{id}'.format(type=related_type, id=related.id) }}">{{related.uri}}</a></td>
-                <td>{{related.title}}</td>
+                <td><a href="{{ '/{type}/{id}'.format(type=related[source_or_target].__class__.__apiname__, id=related[source_or_target].id)}}">{{related[source_or_target].uri}}</a></td>
+                <td>{{related[source_or_target].title}}</td>
             </tr>
             {% endfor %}
 
@@ -29,6 +29,11 @@
 </div>
 {% endif %}
 {%- endmacro %}
+
+{% macro mime_list_item(item, mimetype, title) %}
+<li class="list-group-item"><a href="{{'/{type}/{id}?accept={accept_type}'.format(type=item.__class__.__apiname__, id=item.id, accept_type=mimetype)}}">{{title}}</a></li>
+{% endmacro %}
+
 
 {% block content %}
 <div class="container">
@@ -62,21 +67,29 @@
                             <dd class="col-sm-9">{{item.title}}</dd>
                         </dl>
                     </div>
-
-
-                    {{ related(item, "components", "subcomponents", "Subcomponents", "") }}
-
-                    {{ related(item, "components", "subComponentOf", "Subcomponent Of", "") }}
-
-                    {{ related(item, "properties", "properties", "Related Properties", "") }}
-
-                    {{ related(item, "components", "components", "Related Components", "") }}
-
-                    {{ related(item, "states", "states", "Related States", "") }}
-
+                    
+                    {% if item.__class__.__apiname__ == "properties" %}
+                        {{ related(item, "related_components", "source", "Related Components") }}
+                        {{ related(item, "related_states", "target" "Related States") }}
+                    {% endif %}
+                    {% if item.__class__.__apiname__ == "components" %}
+                        {{ related(item, "related_properties", "target", "Related Properties") }}
+                        {{ related(item, "related_states", "target" "Related States") }}
+                    {% endif %}
+                    {% if item.__class__.__apiname__ == "states" %}
+                        {{ related(item, "related_components", "source", "Related Components") }}
+                        {{ related(item, "related_states", "source" "Related States") }}
+                    {% endif %}
 
                     <div class="container mt-5">
                         <span class="bi-files me-1"></span><label for="format-select" class="form-label">Serializations</label>
+                        <ul class="list-group">
+                            <!-- <li class="list-group-item"><a href="{{'/{type}/{id}?accept={accept_type}'.format(type=item.__class__.__apiname__, id=item.id, accept_type='application%2Fschema%2Bjson')}}">JSON Schema</a></li> -->
+                            {{ mime_list_item(item, 'application%2Fschema%2Bjson', "JSON Schema") }}
+                            {{ mime_list_item(item, 'application%2Fshacl%2Bjson', "SHACL Schema") }}
+                            {{ mime_list_item(item, 'application%2Fld%2Bjson', "JSON-LD Instance") }}
+                          </ul>
+                        <!-- 
                         <div class="input-group">
                             <select class="form-select disabled" id="format-select" aria-label="Available Formats">
                                 <option value="1">JSON Schema</option>
@@ -89,7 +102,7 @@
                                     <span class="bi-download"></span>
                                 </button>
                             </span>
-                        </div>
+                        </div> -->
                     </div>
 
                 </div> <!-- end card-body-->

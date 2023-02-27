@@ -5,8 +5,8 @@
 
    
 
-    {% if properties %}
-      <caption>Properties</caption>
+ {% macro make_list(items, title) %}
+      <caption>"{{title}}"</caption>
       <table class="table">
           <colgroup>
             <col class="col-md-7">
@@ -20,73 +20,29 @@
             </tr>
           </thead>
           <tbody>
-              {% for prop in properties %}
+              {% for item in items %}
               <tr>
-              <th scope="row">{{prop.id}}</th>
-              <td><a href="{{'/properties/{id}'.format(id=prop.id)}}">{{prop.uri}}</a></td>
-              <td>{{prop.title}}</td>
+              <th scope="row">{{item.id}}</th>
+              <td><a href="{{'/{type}/{id}'.format(type=item.__class__.__apiname__, id=item.id)}}">{{item.uri}}</a></td>
+              <td>{{item.title}}</td>
               </tr>
               {% endfor %}
               
           </tbody>
       </table>
-    {% endif %}
+  {% endmacro %}
 
-    {% if components %}
-      <caption>Components</caption>
-      <table class="table">
-        <colgroup>
-          <col class="col-md-7">
-          <col class="col-md-4">
-      </colgroup>
-          <thead>
-            <tr>
-              <th scope="col">ID</th>
-              <th scope="col">URI</th>
-              <th scope="col">Title</th>
-            </tr>
-          </thead>
-          <tbody>
-              {% for comp in components %}
-              <tr>
-              <th scope="row">{{comp.id}}</th>
-              <td><a href="{{'/components/{id}'.format(id=comp.id)}}">{{comp.uri}}</a></td>
-              <td>{{comp.title}}</td>
-              </tr>
-              {% endfor %}
-              
-          </tbody>
-      </table>
-    {% endif %}
+  {% if properties %}
+      {{ make_list(properties, "Properties") }}
+  {% endif %}
 
-    {% if states %}
-      <caption>States</caption>
-      <table class="table">
-        <colgroup>
-          <col class="col-md-7">
-          <col class="col-md-4">
-      </colgroup>
-          <thead>
-            <tr>
-              <th scope="col">ID</th>
-              <th scope="col">URI</th>
-              <th scope="col">Title</th>
-            </tr>
-          </thead>
-          <tbody>
-              {% for state in states %}
-              <tr>
-              <th scope="row">{{state.id}}</th>
-              <td><a href="{{'/states/{id}'.format(id=state.id)}}">{{state.uri}}</a></td>
-              <td>{{state.title}}</td>
-              </tr>
-              {% endfor %}
-              
-          </tbody>
-      </table>
-    {% endif %}
+  {% if components %}
+  {{ make_list(components, "Components") }}
+  {% endif %}
 
-   
+  {% if states %}
+  {{ make_list(states, "States") }}
+  {% endif %}
    
  </div>
 </div>

@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: © 2023 Devon D. Sparks <devonsparks.com>
 # SPDX-License-Identifier: MIT
 
-from . import Presenter, Model, Component, Property
+from . import Presenter, Component, Property
 from .jsonschema import JSONSchemaPresenter
 import jsonschema_default
 
@@ -19,17 +19,9 @@ class JSONLDContextPresenter(Presenter):
     @classmethod
     def present_component(cls, comp : Component):
         ctx = []
-        for assignment in comp.property_assignments:
-            ctx.append({assignment.key:cls.present_property(assignment.property)})
-        return ctx
-
-    @classmethod
-    def present_type(cls, type : Type):
-        ctx = []
-        for assignment in type.component_assignments:
-            ctx.append({assignment.key:"@nest"})
-            for item in cls.present_component(assignment.component):
-                ctx.append(item)
+        for related_prop in comp.related_properties:
+            if related_prop.target.title:
+                ctx.append({related_prop.target.title:cls.present_property(related_prop.target)})
         return ctx
 
 
@@ -46,7 +38,3 @@ class JSONLDPresenter(Presenter):
         return {"@context":JSONLDContextPresenter.present(comp), 
             **jsonschema_default.create_from(JSONSchemaPresenter.present(comp))}
 
-    @classmethod
-    def present_type(cls, type : Type):
-        return {"@context":JSONLDContextPresenter.present(type), 
-            **jsonschema_default.create_from(JSONSchemaPresenter.present(type))}

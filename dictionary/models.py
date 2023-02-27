@@ -1,44 +1,55 @@
 # SPDX-FileCopyrightText: © 2023 Devon D. Sparks <devonsparks.com>
 # SPDX-License-Identifier: MIT
 
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, UniqueConstraint, Table, event
+
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy_utils import URLType
 from sqlalchemy.orm import relationship, backref, mapped_column
 from database import Base
 
+from uuid_extensions import uuid7str
 
+def new_id():
+    return uuid7str()
 
 class Item(Base):
     __tablename__ = "Item"
-    id = Column(Integer, primary_key = True, autoincrement=True)
+    __apiname__ = "items"
+    id = Column(String, primary_key=True, default=new_id)
     uri = Column(URLType, index=True)
     title = Column(String, default="")
     description = Column(String, default="")
     type = Column(String, nullable=False)
-    prev_id = mapped_column(Integer, ForeignKey('Item.id'), default=None)
-    next = relationship("Item", uselist = False, foreign_keys="[Item.prev_id]", backref=backref("prev", remote_side=[id]))
-    pred_id = mapped_column(Integer, ForeignKey('Item.id'), default=None)
-    succ = relationship("Item", uselist = False, foreign_keys="[Item.pred_id]", backref=backref("pred", remote_side=[id]))
+    prev_id = mapped_column(None, ForeignKey('Item.id'), default=None)
+    next = relationship("Item", uselist=False, foreign_keys="[Item.prev_id]", backref=backref(
+        "prev", remote_side=[id]))
+    pred_id = mapped_column(None, ForeignKey('Item.id'), default=None)
+    succ = relationship("Item", uselist=False, foreign_keys="[Item.pred_id]", backref=backref(
+        "pred", remote_side=[id]))
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.type = self.__class__.__tablename__
-        
+        self.id = new_id()
+    @classmethod
+    def get(cls, session, id):
+        return session.get(cls, id)
 
     def post(self, session):
         session.add(self)
         session.flush()  # generate auto-id
         if not self.uri:
-            self.uri = "/{type}/{id}".format(type=self.type, id=self.id)
-        pred = session.query(Item).filter(Item.uri == self.uri).filter(Item.id < self.id).order_by(Item.id.desc()).first()
+            self.uri = "/{type}/{id}".format(type = self.__class__.__apiname__, id=self.id)
+        pred = session.query(Item).filter(Item.uri == self.uri).filter(
+            Item.id < self.id).order_by(Item.id.desc()).first()
         if pred:
             self.pred_id = pred.id
-        if self.id > 1:
-            prev = session.query(Item).filter(Item.type == self.type).filter(Item.id < self.id).order_by(Item.id.desc()).first()
+        if self.id:  # FIXME: always True after autocrement change?
+            prev = session.query(Item).filter(Item.type == self.type).filter(
+                Item.id < self.id).order_by(Item.id.desc()).first()
             if prev:
                 self.prev_id = prev.id
         session.commit()
-
 
     def delete(self, session):
         if self.next:
@@ -51,10 +62,6 @@ class Item(Base):
         session.commit()
 
     @classmethod
-    def get(cls, session, id):
-        return session.get(cls, id)
-
-    @classmethod
     def top(cls, session):
         return session.query(cls).filter(cls.next == None).order_by(cls.id.desc()).first()
 
@@ -64,124 +71,95 @@ class Item(Base):
 
     def compatible_with(self, other):
         return type(self) == type(other) and self.uri == other.uri
-    
+
     def __repr__(self):
-        return '<%s(id=|%d|, uri=|%s|, title=|%s|)>' % (self.__class__.__name__, self.id or -1, self.uri or "", self.title or "")
+        return '<%s(id=|%s|, uri=|%s|, title=|%s|)>' % (self.__class__.__name__, self.id or -1, self.uri or "", self.title or "")
 
-
-component_property = Table(
-    'component_property', Base.metadata,
-    Column('prop_id', Integer, ForeignKey('Property.id'), index=True),
-    Column('comp_id', Integer, ForeignKey('Component.id'), index=True),
-    Column('refs', Integer, default = 0),
-    UniqueConstraint('prop_id', 'comp_id', name='component_property_constraint'))
-
-state_property = Table(
-    'state_property', Base.metadata,
-    Column('state_id', Integer, ForeignKey('State.id'), index=True),
-    Column('prop_id', Integer, ForeignKey('Property.id')),
-    UniqueConstraint('state_id', 'prop_id', name='state_property_constraint'))
-
-state_component = Table(
-    'state_component', Base.metadata,
-    Column('state_id', Integer, ForeignKey('State.id'), index=True),
-    Column('comp_id', Integer, ForeignKey('Component.id')),
-    UniqueConstraint('state_id', 'comp_id', name='state_component_constraint'))
-
-component_subs = Table(
-    'component_subs', Base.metadata,
-    Column('sub_id', Integer, ForeignKey('Component.id'), index=True),
-    Column('subOf_id', Integer, ForeignKey('Component.id')),
-    UniqueConstraint('sub_id', 'subOf_id', name='component_subs_constraint'))
 
 class Property(Item):
     __tablename__ = "Property"
+    __apiname__ = "properties"
     __mapper_args__ = {
         'polymorphic_identity': 'Property',
     }
     id = Column(None, ForeignKey('Item.id'), primary_key=True)
-    required = Column(Boolean, default = False)
+    required = Column(Boolean, default=False)
     datatype = Column(URLType)
-    lower = Column(Integer, default = 0)
-    upper = Column(Integer, default = -1)
-    ordered = Column(Boolean, default = False)
-    #opposite = Column(None, ForeignKey('Property.id'), nullable = True)
+    lower = Column(Integer, default=0)
+    upper = Column(Integer, default=-1)
+    ordered = Column(Boolean, default=False)
+    # opposite = Column(None, ForeignKey('Property.id'), nullable = True)
 
-    def delete(self, session):
-        for comp in self.components:
-            comp.properties.remove(self)
-        super().delete(session)
+    related_components = relationship("ComponentPropertyRelation",
+                                      back_populates="target")
+
+    related_states = relationship("StatePropertyRelation",
+                                      back_populates="target")
 
 
-    def compatible_with(self, other):
-        if not super().compatible_with(other):
-            return False
-        if other.required == self.required:
-            return True
-        else:
-            if other.id < self.id:
-                if other.required and not self.required:
-                    return True
-                else:
-                    return False
-            else:
-                if other.required and not self.required:
-                    return False
-                else:
-                    return True
-                
+class StringProperty(Property):
+    __tablename__ = "StringProperty"
+    __mapper_args__ = {
+        'polymorphic_identity': 'StringProperty',
+    }
+    id = Column(None, ForeignKey('Property.id'), primary_key=True)
+    pattern = Column(String, default="*.")
+
+class ValueRangeProperty(Property):
+    __tablename__ = "ValueRangeProperty"
+    __mapper_args__ = {
+        'polymorphic_identity': 'ValueRangeProperty',
+    }
+    id = Column(None, ForeignKey('Property.id'), primary_key=True)
+    minimum = Column(String, default = None)
+    maximum = Column(String, default = None)
 
 class Component(Item):
     __tablename__ = "Component"
+    __apiname__ = "components"
     __mapper_args__ = {
-        'polymorphic_identity': 'Component',
+        'polymorphic_identity': 'Component'
     }
     id = Column(None, ForeignKey('Item.id'), primary_key=True)
 
-    subcomponents = relationship('Component',
-                           secondary=component_subs,
-                           primaryjoin= id==component_subs.c.sub_id,
-                           secondaryjoin= id==component_subs.c.subOf_id, backref=backref("subComponentOf"))
+    related_subcomponents = relationship("ComponentComponentRelation",
+                                         back_populates="source",
+                                         foreign_keys="[ComponentComponentRelation.source_id]")
 
-    properties = relationship('Property',
-                           secondary=component_property,
-                           primaryjoin= id==component_property.c.comp_id,
-                           secondaryjoin=Property.id==component_property.c.prop_id, backref=backref("components"))
-    
+    related_supercomponents = relationship("ComponentComponentRelation",
+                                           back_populates="target",
+                                           foreign_keys="[ComponentComponentRelation.target_id]")
+
+    related_properties = relationship("ComponentPropertyRelation",
+                                      back_populates="source")
+
+    related_states = relationship("StateComponentRelation",
+                                      back_populates="target")
+
+
     def delete(self, session):
         for prop in self.properties:
             prop.components.remove(self)
         super().delete(session)
 
-    def compatible_with(self, other):
-        if not super().compatible_with(other):
-            return False
-        return set(other.properties).issubset(self.properties)
-
-
 
 class State(Item):
     __tablename__ = "State"
+    __apiname__ = "states"
     __mapper_args__ = {
         'polymorphic_identity': 'State',
     }
     id = Column(None, ForeignKey('Item.id'), primary_key=True)
-    major_version = Column(Integer, default=0)
-    minor_version = Column(Integer, default=0)
-    prop_id = Column(Integer, ForeignKey('Property.id'))
-    comp_id = Column(Integer, ForeignKey('Component.id'))
-    top_property = relationship("Property", foreign_keys="[State.prop_id]")
-    top_component = relationship("Component", foreign_keys="[State.comp_id]")
+    property_id = Column(None, ForeignKey('Property.id'))
+    component_id = Column(None, ForeignKey('Component.id'))
+    top_property = relationship("Property", foreign_keys="[State.property_id]")
+    top_component = relationship("Component", foreign_keys="[State.component_id]")
 
-    properties = relationship('Property',
-                  secondary=state_property,
-                    primaryjoin= id==state_property.c.state_id,
-                    secondaryjoin=Property.id==state_property.c.prop_id, backref=backref("states"))
+    related_properties = relationship("StatePropertyRelation",
+                                      back_populates="source")
 
-    components = relationship('Component',
-                  secondary=state_component,
-                    primaryjoin= id==state_component.c.state_id,
-                    secondaryjoin=Component.id==state_component.c.comp_id, backref=backref("states"))
+    related_components = relationship("StateComponentRelation",
+                                      back_populates="source")
 
     def post(self, session):
         self.top_property = Property.top(session)
@@ -192,23 +170,78 @@ class State(Item):
     def _freeze(self, session):
         session.flush()
         for prop in Property.current(session):
-            self.properties.append(prop)
+            StatePropertyRelation(source = self, target = prop).post(session)
         for comp in Component.current(session):
-            self.components.append(comp)
-
-    def _compute_version(self, session):
-        if not self.prev:
-            self.major_version = 0
-            return
+            StateComponentRelation(source = self, target = comp).post(session)
+            
 
 
+class Relation:
+    @classmethod
+    def get(cls, session, source_id, target_id):
+        return session.get(cls, (source_id, target_id))
+
+    def post(self, db):
+        # db.flush()
+        link = self.__class__.get(db, self.source.id, self.target.id)
+        if link:
+            print("incrementing...")
+            link.refs = link.refs + 1
+        else:
+            print("adding new")
+            db.add(self)
+            db.commit()
+
+    def delete(self, db):
+        #link = db.get(cls, (source.id, target.id))
+        link = self.__class__.get(db, self.source.id, self.target.id)
+        if link:
+            if link.refs == 1:
+                print("deleting...")
+                db.delete(link)
+                db.commit()
+            else:
+                print("decrementing...")
+                link.refs = link.refs - 1
+        else:
+            raise Exception("No association between source and target")
+
+    @classmethod
+    def create(cls, source_cls, target_cls, source_backref, target_backref):
+        rel_name = "{source}{target}Relation".format(
+            source=source_cls, target=target_cls)
+        table_name = "{source}_{target}_relation".format(
+            source=source_cls, target=target_cls)
+        source_id = Column(String, ForeignKey(
+            "{source_cls}.id".format(source_cls=source_cls)), primary_key=True)
+        target_id = Column(String, ForeignKey(
+            "{target_cls}.id".format(target_cls=target_cls)), primary_key=True)
+        refs = Column(Integer, default=1)
+        source = relationship(source_cls,
+                              back_populates=source_backref,
+                              primaryjoin="{source_cls}.id == {relation}.source_id".format(source_cls=source_cls, relation=rel_name))
+        target = relationship(target_cls,  back_populates=target_backref,
+                              primaryjoin="{target_cls}.id == {relation}.target_id".format(target_cls=target_cls, relation=rel_name))
+
+        return type(rel_name, (Base, Relation,), {"__tablename__": table_name,
+                                                  "source": source, "target": target, "refs": refs,
+                                                  "source_id": source_id, "target_id": target_id})
 
 
-@event.listens_for(Component.subcomponents, 'append', propagate=True)
-def on_subcomponent_add(comp, sub, _):
-    for prop in sub.properties:
-        comp.properties.append(prop)
 
-@event.listens_for(Component.subcomponents, 'remove', propagate=True)
-def on_subcomponent_remove(comp, sub, _):
-    pass
+ComponentPropertyRelation = Relation.create(
+    "Component", "Property", "related_properties", "related_components")
+
+ComponentComponentRelation = Relation.create(
+    "Component", "Component", "related_subcomponents", "related_supercomponents")
+
+StateComponentRelation = Relation.create(
+    "State", "Component", "related_components", "related_states")
+
+StatePropertyRelation = Relation.create(
+    "State", "Property", "related_properties", "related_states")
+
+
+
+
+# /{source_type}/{source_id}/links/{target_type}/{target_id}
