@@ -40,6 +40,10 @@
   {{ make_list(components, "Components") }}
   {% endif %}
 
+  {% if types %}
+  {{ make_list(types, "Types") }}
+  {% endif %}
+
   {% if states %}
   {{ make_list(states, "States") }}
   {% endif %}

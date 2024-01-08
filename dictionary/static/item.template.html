@@ -65,20 +65,56 @@
 
                             <dt class="col-sm-3">Title</dt>
                             <dd class="col-sm-9">{{item.title}}</dd>
+
+                            {% if "Property" in item.__class__.__tablename__ %}
+                            <dt class="col-sm-3">Datatype</dt>
+                            <dd class="col-sm-9">{{item.datatype}}</dd>
+
+                            <dt class="col-sm-3">Lower Bound</dt>
+                            <dd class="col-sm-9">{{item.lower}}</dd>
+
+                            <dt class="col-sm-3">Upper Bound</dt>
+                            <dd class="col-sm-9">{{item.upper if item.upper > 0 else '&infin;'|safe}}</dd>
+                            
+                            <dt class="col-sm-3">Ordered?</dt>
+                            <dd class="col-sm-9">{{item.ordered}}</dd>
+                            {% endif %}
+
+                            {% if "StringProperty" in item.__class__.__tablename__ %}
+                            <dt class="col-sm-3">Regex Pattern</dt>
+                            <dd class="col-sm-9">{{item.pattern}}</dd>
+                            {% endif %}
+
+                            {% if "ValueRangeProperty" in item.__class__.__tablename__ %}
+                            <dt class="col-sm-3">Minimum Value</dt>
+                            <dd class="col-sm-9">{{item.minimum}}</dd>
+
+                            <dt class="col-sm-3">Maximum Value</dt>
+                            <dd class="col-sm-9">{{item.maximum}}</dd>
+                            {% endif %}
                         </dl>
                     </div>
                     
-                    {% if item.__class__.__apiname__ == "properties" %}
+                    {% if "Property" in item.__class__.__tablename__ %}
                         {{ related(item, "related_components", "source", "Related Components") }}
-                        {{ related(item, "related_states", "target" "Related States") }}
+                        {{ related(item, "related_states", "source",  "Related States") }}
                     {% endif %}
-                    {% if item.__class__.__apiname__ == "components" %}
+
+                    {% if "Component" in item.__class__.__tablename__ %}
                         {{ related(item, "related_properties", "target", "Related Properties") }}
-                        {{ related(item, "related_states", "target" "Related States") }}
+                        {{ related(item, "related_types", "source", "Related Types") }}
+                        {{ related(item, "related_states", "source", "Related States") }}
                     {% endif %}
-                    {% if item.__class__.__apiname__ == "states" %}
-                        {{ related(item, "related_components", "source", "Related Components") }}
-                        {{ related(item, "related_states", "source" "Related States") }}
+
+                    {% if "Type" in item.__class__.__tablename__ %}
+                    {{ related(item, "related_components", "target", "Related Components") }}
+                    {{ related(item, "related_states", "source", "Related States") }}
+                    {% endif %}
+
+                    {% if "State" in item.__class__.__tablename__ %}
+                        {{ related(item, "related_types", "target", "Related Types") }}
+                        {{ related(item, "related_components", "target", "Related Components") }}
+                        {{ related(item, "related_properties", "target", "Related Properties") }}
                     {% endif %}
 
                     <div class="container mt-5">
@@ -88,29 +124,16 @@
                             {{ mime_list_item(item, 'application%2Fschema%2Bjson', "JSON Schema") }}
                             {{ mime_list_item(item, 'application%2Fshacl%2Bjson', "SHACL Schema") }}
                             {{ mime_list_item(item, 'application%2Fld%2Bjson', "JSON-LD Instance") }}
+                            <li class="list-group-item">EXPRESS</li>
+                            <li class="list-group-item">UML</li>
                           </ul>
-                        <!-- 
-                        <div class="input-group">
-                            <select class="form-select disabled" id="format-select" aria-label="Available Formats">
-                                <option value="1">JSON Schema</option>
-                                <option value="2">JSON-LD</option>
-                                <option value="3">*EXPRESS</option>
-                            </select>
-
-                            <span class="input-group-btn">
-                                <button class="btn btn-default" type="button" tabindex="-1">
-                                    <span class="bi-download"></span>
-                                </button>
-                            </span>
-                        </div> -->
+                       
                     </div>
 
                 </div> <!-- end card-body-->
 
             </div>
         </div>
-
-
 
 
 

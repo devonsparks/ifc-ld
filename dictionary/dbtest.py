@@ -7,7 +7,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from database import Base
 
-from models import Item, Property, Component, ComponentPropertyRelation, State
+from models import Item, Property, Component, State,Type, HasPropertyRelation, HasComponentRelation
 
 from sqlalchemy import select
 
@@ -54,19 +54,26 @@ session.commit()
 
 """
 
-slab = Component(uri="http://ifc.org/Slab")
-wall = Component(uri="http://ifc.org/Wall")
+
 length = Property(uri="http://schema.org/length")
+width = Property(uri="http://schema.org/width")
 material = Property(uri="http://schema.org/material")
+
+Dimension = Component(uri="http://schema.org/Dimension")
+
+slab = Type(uri="http://ifc.org/Slab")
+wall = Type(uri="http://ifc.org/Wall")
     
-items = [slab, wall, length, material]
+items = [slab, wall, length, material, Dimension]
    
 for item in items:
         item.post(session)
     
-ComponentPropertyRelation(source = slab, target= length).post(session)
-ComponentPropertyRelation(source = slab, target= material).post(session)
-ComponentPropertyRelation(source = wall, target= material).post(session)
+HasPropertyRelation(source = Dimension, target= length).post(session)
+HasPropertyRelation(source = Dimension, target= material).post(session)
+#HasPropertyRelation(source = wall, target= material).post(session)
+
+HasComponentRelation(source = wall, target= Dimension).post(session)
 session.commit()
 #ComponentPropertyRelation(source=c1, target=p1).delete(session)
 #assert ComponentPropertyRelation.get(session, c1.id, p1.id).refs == 1
@@ -74,4 +81,7 @@ session.commit()
 #assert not ComponentPropertyRelation.get(session, c1.id, p1.id)
 #session.commit()
 
+from init import init_bsdd, init
+#init(session)
+init_bsdd(session)
 

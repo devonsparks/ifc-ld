@@ -12,6 +12,8 @@ class Presenter(abc.ABC):
             return cls.present_property(object)
         elif isinstance(object, Component):
             return cls.present_component(object)
+        elif isinstance(object, Type):
+            return cls.present_type(object)
         elif isinstance(object, State):
             return cls.present_state(object)
         elif isinstance(object, dict):
@@ -27,6 +29,9 @@ class Presenter(abc.ABC):
     def present_component(cls, comp : Component):
         pass
 
+    @abc.abstractclassmethod
+    def present_type(cls, type : Type):
+        pass
 
     @abc.abstractclassmethod
     def present_state(cls, state : State):

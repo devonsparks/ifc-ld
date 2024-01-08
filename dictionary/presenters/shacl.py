@@ -1,14 +1,14 @@
 # SPDX-FileCopyrightText: © 2023 Devon D. Sparks <devonsparks.com>
 # SPDX-License-Identifier: MIT
 
-from . import Presenter, Component, Property
+from . import Presenter, Type, Component, Property
 
 class SHACLPresenter(Presenter):
     Mimetype="application/shacl+json"
     @classmethod
     def present_property(cls, prop : Property):
         json = {"@type":"sh:PropertyShape"}
-        json["sh:path"] = prop.id
+        json["sh:path"] = prop.uri
         json["sh:description"] = prop.description
         json["sh:name"] = prop.title
         json["sh:minCount"] = prop.lower
@@ -22,4 +22,15 @@ class SHACLPresenter(Presenter):
                 "sh:property":[]}
         for related_prop in comp.related_properties:
                 json["sh:property"].append(cls.present_property(related_prop.target))
+        return json
+
+    @classmethod
+    def present_type(cls, type : Type):
+        #FIXME - just flattening properties for demonstration for now.
+        json = {"@type":"sh:NodeShape", 
+                "sh:property":[]}
+        for related_comp in type.related_components:
+                shape = cls.present_component(related_comp.target)
+                for prop in shape["sh:property"]:
+                    json["sh:property"].append(prop)
         return json

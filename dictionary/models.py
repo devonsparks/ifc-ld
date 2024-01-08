@@ -15,6 +15,10 @@ def new_id():
 class Item(Base):
     __tablename__ = "Item"
     __apiname__ = "items"
+    __mapper_args__ = {
+        "polymorphic_identity":"Item",
+        "polymorphic_on":"type"
+    }
     id = Column(String, primary_key=True, default=new_id)
     uri = Column(URLType, index=True)
     title = Column(String, default="")
@@ -69,9 +73,6 @@ class Item(Base):
     def current(cls, session):
         return session.query(cls).filter(cls.succ == None).all()
 
-    def compatible_with(self, other):
-        return type(self) == type(other) and self.uri == other.uri
-
     def __repr__(self):
         return '<%s(id=|%s|, uri=|%s|, title=|%s|)>' % (self.__class__.__name__, self.id or -1, self.uri or "", self.title or "")
 
@@ -90,7 +91,7 @@ class Property(Item):
     ordered = Column(Boolean, default=False)
     # opposite = Column(None, ForeignKey('Property.id'), nullable = True)
 
-    related_components = relationship("ComponentPropertyRelation",
+    related_components = relationship("HasPropertyRelation",
                                       back_populates="target")
 
     related_states = relationship("StatePropertyRelation",
@@ -105,14 +106,16 @@ class StringProperty(Property):
     id = Column(None, ForeignKey('Property.id'), primary_key=True)
     pattern = Column(String, default="*.")
 
+
 class ValueRangeProperty(Property):
     __tablename__ = "ValueRangeProperty"
     __mapper_args__ = {
         'polymorphic_identity': 'ValueRangeProperty',
     }
     id = Column(None, ForeignKey('Property.id'), primary_key=True)
-    minimum = Column(String, default = None)
-    maximum = Column(String, default = None)
+    minimum = Column(Integer, default = 0)
+    maximum = Column(Integer, default = -1)
+
 
 class Component(Item):
     __tablename__ = "Component"
@@ -122,25 +125,42 @@ class Component(Item):
     }
     id = Column(None, ForeignKey('Item.id'), primary_key=True)
 
-    related_subcomponents = relationship("ComponentComponentRelation",
-                                         back_populates="source",
-                                         foreign_keys="[ComponentComponentRelation.source_id]")
+    #related_subcomponents = relationship("HasSubComponentRelation",
+    #                                     back_populates="source",
+    #                                     foreign_keys="[HasSubComponentRelation.source_id]")
 
-    related_supercomponents = relationship("ComponentComponentRelation",
-                                           back_populates="target",
-                                           foreign_keys="[ComponentComponentRelation.target_id]")
+    #related_supercomponents = relationship("HasSubComponentRelation",
+    #                                       back_populates="target",
+    #                                       foreign_keys="[HasSubComponentRelation.target_id]")
 
-    related_properties = relationship("ComponentPropertyRelation",
+    related_properties = relationship("HasPropertyRelation",
                                       back_populates="source")
+
+    related_types = relationship("HasComponentRelation",
+                                      back_populates="target")
 
     related_states = relationship("StateComponentRelation",
                                       back_populates="target")
-
 
     def delete(self, session):
         for prop in self.properties:
             prop.components.remove(self)
         super().delete(session)
+
+
+class Type(Item):
+    __tablename__ = "Type"
+    __apiname__ = "types"
+    __mapper_args__ = {
+        'polymorphic_identity': 'Type',
+    }
+    id = Column(None, ForeignKey('Item.id'), primary_key=True)
+
+    related_components = relationship("HasComponentRelation",
+                                      back_populates="source")
+
+    related_states = relationship("StateTypeRelation",
+                                      back_populates="target")
 
 
 class State(Item):
@@ -152,8 +172,10 @@ class State(Item):
     id = Column(None, ForeignKey('Item.id'), primary_key=True)
     property_id = Column(None, ForeignKey('Property.id'))
     component_id = Column(None, ForeignKey('Component.id'))
+    type_id = Column(None, ForeignKey('Type.id'))
     top_property = relationship("Property", foreign_keys="[State.property_id]")
     top_component = relationship("Component", foreign_keys="[State.component_id]")
+    top_type = relationship("Type", foreign_keys="[State.type_id]")
 
     related_properties = relationship("StatePropertyRelation",
                                       back_populates="source")
@@ -161,9 +183,13 @@ class State(Item):
     related_components = relationship("StateComponentRelation",
                                       back_populates="source")
 
+    related_types = relationship("StateTypeRelation",
+                                      back_populates="source")
+
     def post(self, session):
         self.top_property = Property.top(session)
         self.top_component = Component.top(session)
+        self.top_type = Type.top(session)
         self._freeze(session)
         super().post(session)
 
@@ -173,10 +199,14 @@ class State(Item):
             StatePropertyRelation(source = self, target = prop).post(session)
         for comp in Component.current(session):
             StateComponentRelation(source = self, target = comp).post(session)
+        for type in Type.current(session):
+            StateTypeRelation(source = self, target = type).post(session)
             
 
-
-class Relation:
+class RefCountMixin:
+    refs = Column(Integer, default=1)
+    
+class RelationMixin(RefCountMixin):
     @classmethod
     def get(cls, session, source_id, target_id):
         return session.get(cls, (source_id, target_id))
@@ -223,25 +253,77 @@ class Relation:
         target = relationship(target_cls,  back_populates=target_backref,
                               primaryjoin="{target_cls}.id == {relation}.target_id".format(target_cls=target_cls, relation=rel_name))
 
-        return type(rel_name, (Base, Relation,), {"__tablename__": table_name,
+        return type(rel_name, (Base, RelationMixin,), {"__tablename__": table_name,
                                                   "source": source, "target": target, "refs": refs,
                                                   "source_id": source_id, "target_id": target_id})
 
 
+class HasPropertyRelation(Base, RelationMixin, RefCountMixin):
+    __tablename__="HasPropertyRelation"
+    __apiname__ = "HasPropertyRelation"
+    __mapper_args__ = {
+        'polymorphic_identity': 'HasPropertyRelation',
+    }
+    source_id = Column(String, ForeignKey('Component.id'), primary_key=True)
+    target_id = Column(String, ForeignKey('Property.id'), primary_key=True)
+    source = relationship("Component", back_populates="related_properties")
+    target = relationship("Property",  back_populates="related_components")
 
-ComponentPropertyRelation = Relation.create(
-    "Component", "Property", "related_properties", "related_components")
 
-ComponentComponentRelation = Relation.create(
-    "Component", "Component", "related_subcomponents", "related_supercomponents")
+class HasComponentRelation(Base, RelationMixin, RefCountMixin):
+    __tablename__="HasComponentRelation"
+    __apiname__ = "HasComponentRelation"
+    __mapper_args__ = {
+        'polymorphic_identity': 'HasComponentRelation',
+    }
+    source_id = Column(String, ForeignKey('Type.id'), primary_key=True)
+    target_id = Column(String, ForeignKey('Component.id'), primary_key=True)
+    source = relationship("Type",
+                              back_populates="related_components",
+                              primaryjoin="Type.id == HasComponentRelation.source_id")
+    target = relationship("Component",  back_populates="related_types",
+                              primaryjoin="Component.id == HasComponentRelation.target_id")
 
-StateComponentRelation = Relation.create(
+
+"""
+
+class HasSubComponentRelation(Base, RelationMixin, RefCountMixin):
+    __tablename__="HasSubComponentRelation"
+    __apiname__ = "HasSubComponentRelation"
+    __mapper_args__ = {
+        'polymorphic_identity': 'HasSubComponentRelation',
+    }
+    source_id = Column(String, ForeignKey('Component.id'), primary_key=True)
+    target_id = Column(String, ForeignKey('Component.id'), primary_key=True)
+    source = relationship("Component",
+                              back_populates="related_subcomponents",
+                              primaryjoin="Component.id == HasSubComponentRelation.source_id")
+    target = relationship("Component",  back_populates="related_supercomponents",
+                              primaryjoin="Component.id == HasSubComponentRelation.target_id")
+
+    def post(self, db):
+        super().post(db)
+        print(self.target)
+        print(self.target.related_properties)
+        for related_prop in self.target.related_properties:
+            print(related_prop.target)
+            HasPropertyRelation(source=self.source, target=related_prop.target).post(db)
+        db.commit()
+"""
+#HasPropertyRelation = RelationMixin.create(
+#    "Component", "Property", "related_properties", "related_components")
+
+#HasSubComponentRelation = RelationMixin.create(
+#    "Component", "Component", "related_subcomponents", "related_supercomponents")
+
+StateComponentRelation = RelationMixin.create(
     "State", "Component", "related_components", "related_states")
 
-StatePropertyRelation = Relation.create(
+StatePropertyRelation = RelationMixin.create(
     "State", "Property", "related_properties", "related_states")
 
-
+StateTypeRelation = RelationMixin.create(
+    "State", "Type", "related_types", "related_states")
 
 
 # /{source_type}/{source_id}/links/{target_type}/{target_id}

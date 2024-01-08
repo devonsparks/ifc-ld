@@ -9,8 +9,8 @@ from pydantic import AnyUrl
 from sqlalchemy.orm.collections import InstrumentedList
 from sqlalchemy.orm import Session
 from typing import Union
-from models import Property, Component, State
-from models import StateComponentRelation, StatePropertyRelation, ComponentPropertyRelation, ComponentComponentRelation
+from models import Property, Component, Type, State
+from models import StateComponentRelation, StatePropertyRelation, StateTypeRelation, HasPropertyRelation, HasComponentRelation
 
 from database import Base, engine, get_db
 import dtos
@@ -60,6 +60,7 @@ def set(type, db: Session, req: Request, dto: dtos.Base):
 app = get_application()
 
 class TypeName(str, Enum):
+    Type = "types"
     Property = "properties"
     Component = "components"
     State = "states"
@@ -70,7 +71,7 @@ class ContentTypes(str, Enum):
     JSONLD = "application/ld+json"
     HTML = "text/html"
 
-TypeMap = {"properties":Property, "components":Component, "states":State}
+TypeMap = {"properties":Property, "components":Component, "types":Type, "states":State}
 
 
 class StdLink(str, Enum):
@@ -97,6 +98,7 @@ def get_type(req: Request, db: Session = Depends(get_db)):
     index = {}
     index["properties"] = db.query(Property).order_by(Property.id.desc()).all()
     index["components"] = db.query(Component).order_by(Component.id.desc()).all()
+    index["types"] = db.query(Type).order_by(Type.id.desc()).all()
     index["states"] = db.query(State).order_by(State.id.desc()).all()
     return present(index, req.headers.get("accept"))
 
@@ -135,6 +137,8 @@ def get_related(req: Request, source_type : TypeName, id : str, target_type : Ty
         return item.related_properties
     elif target_type == "components":
         return item.related_components
+    elif target_type == "types":
+        return item.related_types
     elif target_type == "states":
         return item.related_states
     else:
@@ -146,43 +150,71 @@ def get_related(req: Request, source_type : TypeName, id : str, target_type : Ty
     item = TypeMap[source_type].get(db, id)
     if not item:
         raise HTTPException(status_code=404, detail="Item with ID {id} not found.".format(id = id))
+    
     if source_type == "components" and target_type == "properties":
-        return db.query(Property).join(ComponentPropertyRelation).filter(ComponentPropertyRelation.source_id == item.id).all()
+        return db.query(Property).join(HasPropertyRelation).filter(HasPropertyRelation.source_id == item.id).all()
     elif source_type == "properties" and target_type == "components":
-        return db.query(Component).join(ComponentPropertyRelation).filter(ComponentPropertyRelation.target_id == item.id).all()
+        return db.query(Component).join(HasPropertyRelation).filter(HasPropertyRelation.target_id == item.id).all()
+    
+    if source_type == "types" and target_type == "components":
+        return db.query(Type).join(HasComponentRelation).filter(HasComponentRelation.source_id == item.id).all()
+    elif source_type == "components" and target_type == "types":
+        return db.query(Component).join(HasComponentRelation).filter(HasPropertyRelation.target_id == item.id).all()
+
     elif source_type == "states" and target_type == "components":
         return db.query(Component).join(StateComponentRelation).filter(StateComponentRelation.source_id == item.id).all()
     elif source_type == "components" and target_type == "states":
         return db.query(State).join(StateComponentRelation).filter(StateComponentRelation.target_id == item.id).all()
+    
     elif source_type == "states" and target_type == "properties":
         return db.query(Property).join(StatePropertyRelation).filter(StatePropertyRelation.source_id == item.id).all()
     elif source_type == "properties" and target_type == "states":
          return db.query(State).join(StatePropertyRelation).filter(StatePropertyRelation.target_id == item.id).all()
+    
+    elif source_type == "states" and target_type == "types":
+        return db.query(Type).join(StateTypeRelation).filter(StateTypeRelation.source_id == item.id).all()
+    elif source_type == "types" and target_type == "states":
+         return db.query(State).join(StatePropertyRelation).filter(StatePropertyRelation.target_id == item.id).all()
+
     else:
         raise HTTPException(status_code=404, detail="Related type {type} not recognized.".format(type=type))
 
 @app.get("/{source_type}/{id}/related/{target_type}/{target_id}")
 def get_related_instance(req: Request, source_type : TypeName, id : str, target_type : TypeName,  target_id : str, db: Session = Depends(get_db)):
     if source_type == "components" and target_type == "properties":
-        return ComponentPropertyRelation.get(db, id, target_id)
+        return HasPropertyRelation.get(db, id, target_id)
     elif source_type == "properties" and target_type == "components":
-        return ComponentPropertyRelation.get(db, target_id, id)
+        return HasPropertyRelation.get(db, target_id, id)
+
+    elif source_type == "types" and target_type == "components":
+        return HasComponentRelation.get(db, id, target_id)
+    elif source_type == "types" and target_type == "components":
+        return HasComponentRelation.get(db, target_id, id)
+
     elif source_type == "states" and target_type == "components":
         return StateComponentRelation.get(db, id, target_id)
     elif source_type == "components" and target_type == "states":
         return StateComponentRelation.get(db, target_id, id)
+
     elif source_type == "states" and target_type == "properties":
         return StatePropertyRelation.get(db, id, target_id)
     elif source_type == "properties" and target_type == "states":
         return StatePropertyRelation.get(db, target_id, id)
+
+    elif source_type == "states" and target_type == "types":
+        return StateTypeRelation.get(db, id, target_id)
+    elif source_type == "types" and target_type == "states":
+        return StateTypeRelation.get(db, target_id, id)
+
     else:
         raise HTTPException(status_code=404, detail="Unknown relation type from {source_type} to {target_type}".format(source_type=source_type, target_type = target_type))
 
+from init import init_bsdd, init
 @app.on_event("startup")
 def startup():
-    from init import init
-    init(next(get_db()))
-
+    db = next(get_db())
+    init_bsdd(db)
+    init(db)
 # /{source_type}/{source_id}/{rel}/{target_id}
 
 # GET /{source_type}

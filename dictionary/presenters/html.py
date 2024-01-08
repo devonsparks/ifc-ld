@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: © 2023 Devon D. Sparks <devonsparks.com>
 # SPDX-License-Identifier: MIT
 
-from . import Presenter, Component, Property, State
+from . import Presenter, Component, Property, Type, State
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 
@@ -13,7 +13,7 @@ class HTMLPresenter(Presenter):
 
     @classmethod
     def present_item(cls, item):
-        type_map = {"Property":"properties", "Component":"components", "State":"states"}
+        type_map = {"Property":"properties", "Component":"components", "State":"states", "Type":"types"}
         return cls.Env.get_template("item.template.html").render(item = item, type_map=type_map)
 
     @classmethod
@@ -23,6 +23,11 @@ class HTMLPresenter(Presenter):
     @classmethod
     def present_component(cls, comp : Component):
         return cls.present_item(comp)
+
+    @classmethod
+    def present_type(cls, type : Type):
+        return cls.present_item(type)
+
     @classmethod
     def present_state(cls, state : State):
         return cls.present_item(state)
@@ -31,4 +36,5 @@ class HTMLPresenter(Presenter):
     def present_index(cls, index: dict):
         return cls.Env.get_template("index.template.html").render(properties = index["properties"],
                                                                   components = index["components"],
+                                                                  types = index["types"], 
                                                                   states = index["states"])
