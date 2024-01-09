@@ -1,0 +1,18 @@
+ifc:tilingpattern
+    rdf:ordered true ;
+    a sh:PropertyShape ;
+    sh:maxCount 1 ;
+    sh:minCount 1 ;
+    sh:name "tilingpattern"@en ;
+    sh:node dash:ListShape ;
+    sh:path ifc:tilingpattern ;
+    sh:property [
+        sh:maxCount 2 ;
+        sh:minCount 2 ;
+        sh:node ifc:ifcvector ;
+        sh:path ([
+                sh:zeroOrMorePath rdf:rest
+            ]
+            rdf:first
+        )
+    ] .

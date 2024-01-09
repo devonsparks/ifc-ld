@@ -1,7 +1,0 @@
-bsdd.py
-env/
-__pycache__/
-data.backup.json
-data.json
-init.py
-.env

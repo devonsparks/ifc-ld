@@ -1,0 +1,12 @@
+ifc:ifcreinforcingmeshtypeenum
+    a sh:NodeShape ;
+    sh:property [
+        sh:datatype xsd:string ;
+        sh:in ("notdefined"
+            "userdefined"
+        ) ;
+        sh:maxCount 1 ;
+        sh:minCount 1 ;
+        sh:path rdf:value
+    ] ;
+    sh:targetClass ifc:ifcreinforcingmeshtypeenum .

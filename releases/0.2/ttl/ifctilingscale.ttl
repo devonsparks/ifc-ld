@@ -1,0 +1,7 @@
+ifc:tilingscale
+    a sh:PropertyShape ;
+    sh:maxCount 1 ;
+    sh:minCount 1 ;
+    sh:name "tilingscale"@en ;
+    sh:node ifc:ifcpositiveratiomeasure ;
+    sh:path ifc:tilingscale .

@@ -1,0 +1,4 @@
+TYPE IfcReinforcingMeshTypeEnum = ENUMERATION OF
+	(USERDEFINED
+	,NOTDEFINED);
+END_TYPE;

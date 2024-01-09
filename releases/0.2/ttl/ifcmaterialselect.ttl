@@ -1,0 +1,6 @@
+ifc:ifcmaterialselect
+    a sh:NodeShape ;
+    sh:xone (ifc:ifcmaterialdefinition
+        ifc:ifcmateriallist
+        ifc:ifcmaterialusagedefinition
+    ) .

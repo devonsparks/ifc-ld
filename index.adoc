@@ -1,0 +1,8 @@
+= IFC-LD
+:data-uri:
+:nofooter:
+
+== Releases
+
+xref:releases/0.2/spec.adoc[v.02] - January 2024
+xref:releases/0.1/spec.adoc[v.01] - October 2022
