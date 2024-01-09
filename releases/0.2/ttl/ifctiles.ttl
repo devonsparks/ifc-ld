@@ -1,0 +1,7 @@
+ifc:tiles
+    rdf:ordered false ;
+    a sh:PropertyShape ;
+    sh:minCount 1 ;
+    sh:name "tiles"@en ;
+    sh:node ifc:ifcstyleditem ;
+    sh:path ifc:tiles .

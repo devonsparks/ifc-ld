@@ -1,0 +1,6 @@
+ENTITY IfcFillAreaStyleTiles
+ SUBTYPE OF (IfcGeometricRepresentationItem);
+	TilingPattern : LIST [2:2] OF IfcVector;
+	Tiles : SET [1:?] OF IfcStyledItem;
+	TilingScale : IfcPositiveRatioMeasure;
+END_ENTITY;

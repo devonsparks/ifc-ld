@@ -1,0 +1,7 @@
+ifc:ifcfillareastyletiles
+    a sh:NodeShape ;
+    sh:and (ifc:ifcgeometricrepresentationitem
+    ) ;
+    sh:name "ifcfillareastyletiles"@en ;
+    sh:property ifc:tiles, ifc:tilingpattern, ifc:tilingscale ;
+    sh:targetClass ifc:ifcfillareastyletiles .

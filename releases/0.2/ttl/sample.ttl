@@ -1,0 +1,142 @@
+@prefix ifc: <http://ifc-ld.org/schemas/ifc4x2#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://base.com/guid> prov:generatedAtTime "2020-11-30T17:44:46"^^xsd:dateTime .
+
+<http://base.com/guid#11> a ifc:ifcdirection ;
+    ifc:directionratios ( [ rdf:value 1.0 ] [ rdf:value 0.0 ] [ rdf:value 0.0 ] ) .
+
+<http://base.com/guid#13> a ifc:ifcdirection ;
+    ifc:directionratios ( [ rdf:value -1.0 ] [ rdf:value 0.0 ] [ rdf:value 0.0 ] ) .
+
+<http://base.com/guid#15> a ifc:ifcdirection ;
+    ifc:directionratios ( [ rdf:value 0.0 ] [ rdf:value 1.0 ] [ rdf:value 0.0 ] ) .
+
+<http://base.com/guid#17> a ifc:ifcdirection ;
+    ifc:directionratios ( [ rdf:value 0.0 ] [ rdf:value -1.0 ] [ rdf:value 0.0 ] ) .
+
+<http://base.com/guid#19> a ifc:ifcdirection ;
+    ifc:directionratios ( [ rdf:value 0.0 ] [ rdf:value 0.0 ] [ rdf:value 1.0 ] ) .
+
+<http://base.com/guid#21> a ifc:ifcdirection ;
+    ifc:directionratios ( [ rdf:value 0.0 ] [ rdf:value 0.0 ] [ rdf:value -1.0 ] ) .
+
+<http://base.com/guid#23> a ifc:ifcdirection ;
+    ifc:directionratios ( [ rdf:value 1.0 ] [ rdf:value 0.0 ] ) .
+
+<http://base.com/guid#25> a ifc:ifcdirection ;
+    ifc:directionratios ( [ rdf:value -1.0 ] [ rdf:value 0.0 ] ) .
+
+<http://base.com/guid#27> a ifc:ifcdirection ;
+    ifc:directionratios ( [ rdf:value 0.0 ] [ rdf:value 1.0 ] ) .
+
+<http://base.com/guid#29> a ifc:ifcdirection ;
+    ifc:directionratios ( [ rdf:value 0.0 ] [ rdf:value -1.0 ] ) .
+
+<http://base.com/guid#32> a ifc:ifclocalplacement ;
+    ifc:placementrelto <http://base.com/guid#147> ;
+    ifc:relativeplacement <http://base.com/guid#31> .
+
+<http://base.com/guid#41> a ifc:ifcownerhistory ;
+    ifc:changeaction [ rdf:value "nochange"^^xsd:string ] ;
+    ifc:creationdate [ rdf:value 1606175882 ] ;
+    ifc:owningapplication <http://base.com/guid#5> ;
+    ifc:owninguser <http://base.com/guid#38> .
+
+<http://base.com/guid#43> a ifc:ifcsiunit ;
+    ifc:name [ rdf:value "square_metre"^^xsd:string ] ;
+    ifc:unittype [ rdf:value "areaunit"^^xsd:string ] .
+
+<http://base.com/guid#44> a ifc:ifcsiunit ;
+    ifc:name [ rdf:value "cubic_metre"^^xsd:string ] ;
+    ifc:unittype [ rdf:value "volumeunit"^^xsd:string ] .
+
+<http://base.com/guid#48> a ifc:ifcconversionbasedunit ;
+    ifc:conversionfactor <http://base.com/guid#47> ;
+    ifc:dimensions <http://base.com/guid#46> ;
+    ifc:name [ rdf:value "degree"^^xsd:string ] ;
+    ifc:unittype [ rdf:value "planeangleunit"^^xsd:string ] .
+
+<http://base.com/guid#52> a ifc:ifcderivedunit ;
+    ifc:elements <http://base.com/guid#50>,
+        <http://base.com/guid#51> ;
+    ifc:unittype [ rdf:value "massdensityunit"^^xsd:string ] .
+
+<http://base.com/guid#55> a ifc:ifcderivedunit ;
+    ifc:elements <http://base.com/guid#54> ;
+    ifc:unittype [ rdf:value "momentofinertiaunit"^^xsd:string ] .
+
+<http://base.com/guid#57> a ifc:ifcsiunit ;
+    ifc:name [ rdf:value "second"^^xsd:string ] ;
+    ifc:unittype [ rdf:value "timeunit"^^xsd:string ] .
+
+<http://base.com/guid#9> a ifc:ifccartesianpoint ;
+    ifc:coordinates ( [ rdf:value 0.0 ] [ rdf:value 0.0 ] ) .
+
+<http://base.com/guid#1> a ifc:ifcorganization ;
+    ifc:name [ rdf:value "autodesk revit 2021 (esp)"^^xsd:string ] .
+
+<http://base.com/guid#31> a ifc:ifcaxis2placement3d ;
+    ifc:location <http://base.com/guid#6> .
+
+<http://base.com/guid#35> a ifc:ifcperson ;
+    ifc:familyname [ rdf:value ""^^xsd:string ] ;
+    ifc:givenname [ rdf:value "cype"^^xsd:string ] .
+
+<http://base.com/guid#37> a ifc:ifcorganization ;
+    ifc:description [ rdf:value ""^^xsd:string ] ;
+    ifc:name [ rdf:value ""^^xsd:string ] .
+
+<http://base.com/guid#38> a ifc:ifcpersonandorganization ;
+    ifc:theorganization <http://base.com/guid#37> ;
+    ifc:theperson <http://base.com/guid#35> .
+
+<http://base.com/guid#45> a ifc:ifcsiunit ;
+    ifc:name [ rdf:value "radian"^^xsd:string ] ;
+    ifc:unittype [ rdf:value "planeangleunit"^^xsd:string ] .
+
+<http://base.com/guid#46> a ifc:ifcdimensionalexponents ;
+    ifc:amountofsubstanceexponent [ rdf:value 0 ] ;
+    ifc:electriccurrentexponent [ rdf:value 0 ] ;
+    ifc:lengthexponent [ rdf:value 0 ] ;
+    ifc:luminousintensityexponent [ rdf:value 0 ] ;
+    ifc:massexponent [ rdf:value 0 ] ;
+    ifc:thermodynamictemperatureexponent [ rdf:value 0 ] ;
+    ifc:timeexponent [ rdf:value 0 ] .
+
+<http://base.com/guid#47> a ifc:ifcmeasurewithunit ;
+    ifc:unitcomponent <http://base.com/guid#45> ;
+    ifc:valuecomponent [ rdf:value 0.0174532925199433 ] .
+
+<http://base.com/guid#49> a ifc:ifcsiunit ;
+    ifc:name [ rdf:value "gram"^^xsd:string ] ;
+    ifc:prefix [ rdf:value "kilo"^^xsd:string ] ;
+    ifc:unittype [ rdf:value "massunit"^^xsd:string ] .
+
+<http://base.com/guid#5> a ifc:ifcapplication ;
+    ifc:applicationdeveloper <http://base.com/guid#1> ;
+    ifc:applicationfullname [ rdf:value "autodesk revit 2021 (esp)"^^xsd:string ] ;
+    ifc:applicationidentifier [ rdf:value "revit"^^xsd:string ] ;
+    ifc:version [ rdf:value "2021"^^xsd:string ] .
+
+<http://base.com/guid#50> a ifc:ifcderivedunitelement ;
+    ifc:exponent [ rdf:value 1 ] ;
+    ifc:unit <http://base.com/guid#49> .
+
+<http://base.com/guid#51> a ifc:ifcderivedunitelement ;
+    ifc:exponent [ rdf:value -3 ] ;
+    ifc:unit <http://base.com/guid#42> .
+
+<http://base.com/guid#54> a ifc:ifcderivedunitelement ;
+    ifc:exponent [ rdf:value 4 ] ;
+    ifc:unit <http://base.com/guid#42> .
+
+<http://base.com/guid#6> a ifc:ifccartesianpoint ;
+    ifc:coordinates ( [ rdf:value 0.0 ] [ rdf:value 0.0 ] [ rdf:value 0.0 ] ) .
+
+<http://base.com/guid#42> a ifc:ifcsiunit ;
+    ifc:name [ rdf:value "metre"^^xsd:string ] ;
+    ifc:unittype [ rdf:value "lengthunit"^^xsd:string ] .
+

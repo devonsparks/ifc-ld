@@ -1,0 +1,2 @@
+TYPE IfcInductanceMeasure = REAL;
+END_TYPE;

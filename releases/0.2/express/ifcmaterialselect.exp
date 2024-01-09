@@ -1,0 +1,5 @@
+TYPE IfcMaterialSelect = SELECT
+	(IfcMaterialDefinition
+	,IfcMaterialList
+	,IfcMaterialUsageDefinition);
+END_TYPE;

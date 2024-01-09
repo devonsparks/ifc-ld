@@ -1,0 +1,524 @@
+{
+    "@context": {
+        "@base": "http://base.com/guid#",
+        "@vocab": "http://ifc-ld.org/schemas/ifc4x2#",
+        "ifc": "http://ifc-ld.org/schemas/ifc4x2#",
+        "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+        "xsd": "http://www.w3.org/2001/XMLSchema#",
+        "data": "@graph",
+        "a": "@type",
+        "id": "@id"
+    },
+    "id": "#",
+    "prov:generatedAtTime": "2020-11-30T17:44:46",
+    "data": [
+        {
+            "id": "#31",
+            "a": "ifcaxis2placement3d",
+            "location": {
+                "id": "#6"
+            }
+        },
+        {
+            "id": "#47",
+            "a": "ifcmeasurewithunit",
+            "unitcomponent": {
+                "id": "#45"
+            },
+            "valuecomponent": {
+                "rdf:value": {
+                    "@value": "0.0174532925199433"
+                }
+            }
+        },
+        {
+            "id": "#46",
+            "a": "ifcdimensionalexponents",
+            "amountofsubstanceexponent": {
+                "rdf:value": 0
+            },
+            "electriccurrentexponent": {
+                "rdf:value": 0
+            },
+            "lengthexponent": {
+                "rdf:value": 0
+            },
+            "luminousintensityexponent": {
+                "rdf:value": 0
+            },
+            "massexponent": {
+                "rdf:value": 0
+            },
+            "thermodynamictemperatureexponent": {
+                "rdf:value": 0
+            },
+            "timeexponent": {
+                "rdf:value": 0
+            }
+        },
+        {
+            "id": "#35",
+            "a": "ifcperson",
+            "familyname": {
+                "rdf:value": ""
+            },
+            "givenname": {
+                "rdf:value": "cype"
+            }
+        },
+        {
+            "id": "#49",
+            "a": "ifcsiunit",
+            "name": {
+                "rdf:value": "gram"
+            },
+            "prefix": {
+                "rdf:value": "kilo"
+            },
+            "unittype": {
+                "rdf:value": "massunit"
+            }
+        },
+        {
+            "id": "#19",
+            "a": "ifcdirection",
+            "directionratios": {
+                "@list": [
+                    {
+                        "rdf:value": {
+                            "@value": 0.0
+                        }
+                    },
+                    {
+                        "rdf:value": {
+                            "@value": 0.0
+                        }
+                    },
+                    {
+                        "rdf:value": {
+                            "@value": 1.0
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "id": "#42",
+            "a": "ifcsiunit",
+            "name": {
+                "rdf:value": "metre"
+            },
+            "unittype": {
+                "rdf:value": "lengthunit"
+            }
+        },
+        {
+            "id": "#37",
+            "a": "ifcorganization",
+            "description": {
+                "rdf:value": ""
+            },
+            "name": {
+                "rdf:value": ""
+            }
+        },
+        {
+            "id": "#48",
+            "a": "ifcconversionbasedunit",
+            "conversionfactor": {
+                "id": "#47"
+            },
+            "dimensions": {
+                "id": "#46"
+            },
+            "name": {
+                "rdf:value": "degree"
+            },
+            "unittype": {
+                "rdf:value": "planeangleunit"
+            }
+        },
+        {
+            "id": "#43",
+            "a": "ifcsiunit",
+            "name": {
+                "rdf:value": "square_metre"
+            },
+            "unittype": {
+                "rdf:value": "areaunit"
+            }
+        },
+        {
+            "id": "#17",
+            "a": "ifcdirection",
+            "directionratios": {
+                "@list": [
+                    {
+                        "rdf:value": {
+                            "@value": 0.0
+                        }
+                    },
+                    {
+                        "rdf:value": {
+                            "@value": -1.0
+                        }
+                    },
+                    {
+                        "rdf:value": {
+                            "@value": 0.0
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "id": "#25",
+            "a": "ifcdirection",
+            "directionratios": {
+                "@list": [
+                    {
+                        "rdf:value": {
+                            "@value": -1.0
+                        }
+                    },
+                    {
+                        "rdf:value": {
+                            "@value": 0.0
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "id": "#1",
+            "a": "ifcorganization",
+            "name": {
+                "rdf:value": "autodesk revit 2021 (esp)"
+            }
+        },
+        {
+            "id": "#15",
+            "a": "ifcdirection",
+            "directionratios": {
+                "@list": [
+                    {
+                        "rdf:value": {
+                            "@value": 0.0
+                        }
+                    },
+                    {
+                        "rdf:value": {
+                            "@value": 1.0
+                        }
+                    },
+                    {
+                        "rdf:value": {
+                            "@value": 0.0
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "id": "#54",
+            "a": "ifcderivedunitelement",
+            "exponent": {
+                "rdf:value": 4
+            },
+            "unit": {
+                "id": "#42"
+            }
+        },
+        {
+            "id": "#5",
+            "a": "ifcapplication",
+            "applicationdeveloper": {
+                "id": "#1"
+            },
+            "applicationfullname": {
+                "rdf:value": "autodesk revit 2021 (esp)"
+            },
+            "applicationidentifier": {
+                "rdf:value": "revit"
+            },
+            "version": {
+                "rdf:value": "2021"
+            }
+        },
+        {
+            "id": "#9",
+            "a": "ifccartesianpoint",
+            "coordinates": {
+                "@list": [
+                    {
+                        "rdf:value": {
+                            "@value": 0.0
+                        }
+                    },
+                    {
+                        "rdf:value": {
+                            "@value": 0.0
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "id": "#41",
+            "a": "ifcownerhistory",
+            "changeaction": {
+                "rdf:value": "nochange"
+            },
+            "creationdate": {
+                "rdf:value": 1606175882
+            },
+            "owningapplication": {
+                "id": "#5"
+            },
+            "owninguser": {
+                "id": "#38"
+            }
+        },
+        {
+            "id": "#51",
+            "a": "ifcderivedunitelement",
+            "exponent": {
+                "rdf:value": -3
+            },
+            "unit": {
+                "id": "#42"
+            }
+        },
+        {
+            "id": "#50",
+            "a": "ifcderivedunitelement",
+            "exponent": {
+                "rdf:value": 1
+            },
+            "unit": {
+                "id": "#49"
+            }
+        },
+        {
+            "id": "#57",
+            "a": "ifcsiunit",
+            "name": {
+                "rdf:value": "second"
+            },
+            "unittype": {
+                "rdf:value": "timeunit"
+            }
+        },
+        {
+            "id": "#32",
+            "a": "ifclocalplacement",
+            "placementrelto": {
+                "id": "#147"
+            },
+            "relativeplacement": {
+                "id": "#31"
+            }
+        },
+        {
+            "id": "#55",
+            "a": "ifcderivedunit",
+            "elements": {
+                "id": "#54"
+            },
+            "unittype": {
+                "rdf:value": "momentofinertiaunit"
+            }
+        },
+        {
+            "id": "#13",
+            "a": "ifcdirection",
+            "directionratios": {
+                "@list": [
+                    {
+                        "rdf:value": {
+                            "@value": -1.0
+                        }
+                    },
+                    {
+                        "rdf:value": {
+                            "@value": 0.0
+                        }
+                    },
+                    {
+                        "rdf:value": {
+                            "@value": 0.0
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "id": "#52",
+            "a": "ifcderivedunit",
+            "elements": [
+                {
+                    "id": "#50"
+                },
+                {
+                    "id": "#51"
+                }
+            ],
+            "unittype": {
+                "rdf:value": "massdensityunit"
+            }
+        },
+        {
+            "id": "#44",
+            "a": "ifcsiunit",
+            "name": {
+                "rdf:value": "volumeunit"
+            },
+            "unittype": {
+                "rdf:value": "cubic_metre"
+            }
+        },
+        {
+            "id": "#29",
+            "a": "ifcdirection",
+            "directionratios": {
+                "@list": [
+                    {
+                        "rdf:value": {
+                            "@value": 0.0
+                        }
+                    },
+                    {
+                        "rdf:value": {
+                            "@value": -1.0
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "id": "#38",
+            "a": "ifcpersonandorganization",
+            "theorganization": {
+                "id": "#37"
+            },
+            "theperson": {
+                "id": "#35"
+            }
+        },
+        {
+            "id": "#11",
+            "a": "ifcdirection",
+            "directionratios": {
+                "@list": [
+                    {
+                        "rdf:value": {
+                            "@value": 1.0
+                        }
+                    },
+                    {
+                        "rdf:value": {
+                            "@value": 0.0
+                        }
+                    },
+                    {
+                        "rdf:value": {
+                            "@value": 0.0
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "id": "#45",
+            "a": "ifcsiunit",
+            "name": {
+                "rdf:value": "planeangleunit"
+            },
+            "unittype": {
+                "rdf:value": "radian"
+            }
+        },
+        {
+            "id": "#21",
+            "a": "ifcdirection",
+            "directionratios": {
+                "@list": [
+                    {
+                        "rdf:value": {
+                            "@value": 0.0
+                        }
+                    },
+                    {
+                        "rdf:value": {
+                            "@value": 0.0
+                        }
+                    },
+                    {
+                        "rdf:value": {
+                            "@value": -1.0
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "id": "#23",
+            "a": "ifcdirection",
+            "directionratios": {
+                "@list": [
+                    {
+                        "rdf:value": {
+                            "@value": 1.0
+                        }
+                    },
+                    {
+                        "rdf:value": {
+                            "@value": 0.0
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "id": "#27",
+            "a": "ifcdirection",
+            "directionratios": {
+                "@list": [
+                    {
+                        "rdf:value": {
+                            "@value": 0.0
+                        }
+                    },
+                    {
+                        "rdf:value": {
+                            "@value": 1.0
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "id": "#6",
+            "a": "ifccartesianpoint",
+            "coordinates": {
+                "@list": [
+                    {
+                        "rdf:value": {
+                            "@value": 0.0
+                        }
+                    },
+                    {
+                        "rdf:value": {
+                            "@value": 0.0
+                        }
+                    },
+                    {
+                        "rdf:value": {
+                            "@value": 0.0
+                        }
+                    }
+                ]
+            }
+        }
+    ]
+}
