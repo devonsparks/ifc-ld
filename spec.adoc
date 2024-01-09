@@ -1,0 +1,3 @@
+:nofooter:
+
+xref:index.adoc[See the revised index]
