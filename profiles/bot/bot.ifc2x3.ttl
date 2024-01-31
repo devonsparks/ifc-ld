@@ -1,5 +1,5 @@
 @prefix ifc: <http://ifc-ld.org/schemas/ifc2x3#> .
-@prefix mod: <http://ifc-ld.org/transformers/bot/ifc2x3#> .
+@prefix mod: <http://ifc-ld.org/profiles/bot/ifc2x3#> .
 @prefix bot: <https://w3id.org/bot#> .
 @prefix sh: <http://www.w3.org/ns/shacl#> . 
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> . 
