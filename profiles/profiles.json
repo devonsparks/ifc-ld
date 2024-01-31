@@ -1,8 +1,3 @@
 {
-    "https://w3id.org/bot#": [
-        "http://ifc-ld.org/profiles/bot/bot.ifc2x3.ttl",
-        "http://ifc-ld.org/profiles/bot/bot.ifc4.ttl",
-        "http://ifc-ld.org/profiles/bot/bot.ifc4x1.ttl",
-        "http://ifc-ld.org/profiles/bot/bot.ifc4x2.ttl"
-    ]
+    "https://w3id.org/bot#": "http://ifc-ld.org/profiles/bot.ttl"
 }
