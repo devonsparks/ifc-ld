@@ -1,3 +1,3 @@
 {
-    "https://w3id.org/bot#": "http://ifc-ld.org/profiles/bot.ttl"
+    "https://w3id.org/bot#": {"ns":"http://ifc-ld.org/profiles/bot.ttl", "prefix":"bot"}
 }

@@ -3,6 +3,6 @@ CONSTRUCT {
 } WHERE {
     ?component ifc:globalid ?sval .  
     ?sval rdf:value ?globalId . 
-    BIND (URI(CONCAT("http://ifc-ld.org#",?globalId) AS ?entity)) .
+    BIND (URI(CONCAT("http://ifc-ld.org/ids#",?globalId) AS ?entity)) .
     ?component ?property ?value . 
 } 
