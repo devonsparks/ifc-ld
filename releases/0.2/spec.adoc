@@ -16,20 +16,17 @@ Compared to IFC-LD xref:../0.1/spec.adoc[v0.1], this release:
 
 == Rationale
 
-IFC-LD is a data model and family of serializations designed to support the exchange of information about the built environment. It is interoperable with all existing versions of IFC, while embracing new directions. Practically, IFC-LD aims to "rebase" IFC on https://en.wikipedia.org/wiki/Linked_data[linked data], allowing the community to shed its dependency on https://www.iso.org/standard/63141.html[ISO 10303], including the P21 ("STEP") instance format and EXPRESS schema language. 
+IFC-LD is a data model and family of serializations designed to support the exchange of information about the built environment. It is interoperable with all existing versions of IFC, while embracing new directions. Practically, IFC-LD aims to "rebase" IFC on https://en.wikipedia.org/wiki/Linked_data[linked data], allowing the community to shed its dependency on https://www.iso.org/standard/63141.html[ISO 10303], including the P21 ("STEP") instance format and EXPRESS schema language. Unlike ifcOWL, IFC-LD provides full support for https://en.wikipedia.org/wiki/Closed-world_assumption[closed-world] schema definition and validation via the https://www.w3.org/TR/shacl/[SHACL] constraint language. 
 
 IFC-LD attempts to solve several problems with IFC-based data exchanges:
 
-1. To avoid use of custom parsers for https://www.iso.org/standard/63141.html[ISO 10303-21] ("P21") files, IFC-LD defines a simple instance data model based on the https://en.wikipedia.org/wiki/Resource_Description_Framework[Resource Description Framework] (RDF). IFC-LD instance data may be exchanged using any https://www.w3.org/wiki/RdfSyntax[RDF-compatible serialization]. https://www.w3.org/TR/json-ld11/[JSON-LD] is taken as the normative IFC-LD serialization to simplify adoption. 
+1. To avoid use of custom parsers for https://www.iso.org/standard/63141.html[ISO 10303-21] ("P21") files, IFC-LD defines a trivial instance data model based on the https://en.wikipedia.org/wiki/Resource_Description_Framework[Resource Description Framework] (RDF). IFC-LD instance data may be exchanged using any https://www.w3.org/wiki/RdfSyntax[RDF-compatible serialization]. 
 
 2. To avoid the need for bespoke data validation tools, IFC-LD replaces https://en.wikipedia.org/wiki/EXPRESS_(data_modeling_language)[EXPRESS] with https://www.w3.org/TR/shacl/[SHACL] as the de facto encoding of the IFC schema. Given a SHACL-encoded snapshot of the IFC schema, and an IFC-LD instance population, users can validate the instance population against the schema using any SHACL processor. Users may create their own SHACL definitions to extend IFC, similar to what they do today with https://www.buildingsmart.org/what-is-information-delivery-specification-ids/[IDS].
 
 3. To support composition, all IFC schema and instance data are treated as independent assets, linked by URIs. 
 
 Rebasing IFC on a minimal but complete set of linked data standards is what allows IFC-LD to integrate all existing IFC schemas while supporting new directions.
-
-[quote, BuildingSmart Technical Roadmap 2020]
-The challenge is to transform the current standards and solutions towards more generic technology bases. This is needed to create the necessary scalability and broaden adoption. 
 
 == Goals
 
@@ -42,15 +39,17 @@ The vast majority of the world's existing IFC data is encoded as ISO 10303-21 fi
 === Serialization-Agnosticism
 Data serializations are tailored towards specific access patterns. As the access patterns for IFC data are open-ended, and IFC intends to be used by many stakeholders over long periods of time, its encoding must remain agnostic to maximize integration and extension opportunities as the software landscape evolves.  
 
-[quote,BuildingSmart Technical Roadmap 2020]
-Separating the schema of IFC from the modelling language and file format, will force the
-opportunity to eliminate complex modelling heritage. 
-
-
 === Extensibility
 The IFC-LD specification cannot anticipate every need. Instead, it must provide a small set of capabilities that could later be extended. Rather than inventing these extension capabilities from scratch, it can leverage those it builds upon (i.e., RDF, SHACL). 
 
+=== Minimal Inventiveness 
+IFC-LD aims to be defined purely in terms of existing ontologies, data models, and standards. No bespoke technologies or data formats should be required for its implementation. 
+
+[quote, BuildingSmart Technical Roadmap 2020]
+The challenge is to transform the current standards and solutions towards more generic technology bases. This is needed to create the necessary scalability and broaden adoption. 
+
 == Design
+
 
 === Instances
 
@@ -61,9 +60,35 @@ IFC-LD maps P21 instance features directly to RDF, supporting near-lossless conv
 3. P21 instances become RDF https://www.w3.org/TR/rdf11-concepts/#resources-and-statements[resources]. Each instance is assigned a URI by treating its P21 instance number (e.g., `#21`) as a https://www.w3.org/TR/turtle/#relative-iri[relative URI] to the base URI of the exchange file. 
 4. P21 instance properties are indexed by name (e.g., `owningapplication`), taken from the IFC-LD SHACL schema during conversion. 
 5. P21 instance types (e.g., `ifcapplication`) are converted to the equivalent https://www.w3.org/TR/rdf-schema/#ch_type[rdf:type] relation. 
-6. P21 literal values are presented as structured values (https://www.w3.org/TR/rdf-schema/#ch_value[rdf:value]). This simplifies schema-instance alignment, provides a straightforward way to support IFC's type system, and ensures nested P21 instances (e.g., `IFCRATIOMEASURE(41.4)`) and unnested instances serialize consistently. 
+6. P21 literals become RDF resources with property https://www.w3.org/TR/rdf-schema/#ch_value[rdf:value].
++
+[NOTE] 
+====
+[source]
+-----
+IFCDAYINWEEKNUMBER(6)
+-----
+
+is a valid IFC-STEP structured value, so 
+
+[source, turtle]
+-----
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix ifc: <http://ifc-ld.org/schemas/ifc2x3#> .
+
+[] 
+	a ifc:dayofweeknumber ; 
+	rdf:value 6  
+.
+-----
+is a valid IFC-LD structured value. 
+====
+This approach also allows IFC-LD values to carry arbitrary metadata (e.g., about who declared them or which contexts they are relevant in). 
 
 By convention, all IFC-LD type and property names are encoded in lowercase. 
+
+
+
 
 Example P21 instances and their IFC-LD equivalents can be found in <<IFC-LD Instance Examples>>.
 
@@ -77,7 +102,7 @@ To fulfill its <<Goals>>, IFC-LD must adopt a schema language that is:
 
 https://www.w3.org/TR/shacl/#[SHACL] fulfills these requirements, providing a rich schema language backed by a W3C standard with both open and commercial tooling support.
 
-Many EXPRESS constructs have direct equivalents in SHACL. Where there is ambiguity, IFC-LD follows these heuristics:
+All EXPRESS constructs used in IFC can be encoded in SHACL. Where there is ambiguity, IFC-LD follows these heuristics:
 
 - *Treat all structural parts of the IFC schema as first-class*. This maximizes reuse because the same  definition (e.g., of a particular property, like `owningapplication`) can be reused across the schema without duplication. This reduces the size of the schema and cognitive load on those who need to learn it. 
 - *Treat all values as structured values*. This increases the size of serialized instances, but allows schema definitions to be reused across different contexts. It also lets instance values be treated as resources, allowing them to carry additional metadata (e.g., who asserted them, and why). 
@@ -101,16 +126,104 @@ Given an IFC-LD instance population and the SHACL encoding of the corresponding 
 |Functions| https://www.w3.org/TR/shacl-af/#functions[SHACL Functions]
 |===
 
-For example mappings between IFC EXPRESS objects and their SHACL equivalents, see <<EXPRESS to SHACL Examples>>. 
+Example mappings from IFC-EXPRESS schema definitions to their IFC-LD SHACL equivalents are given below. 
 
-For SHACL encodings of existing IFC versions, see <<IFC SHACL Schema Definitions>>. 
+==== Schema Mapping : Types
+
+.IfcInductanceMeasure (EXPRESS)
+[source]
+----
+include::express/ifcinductancemeasure.exp[]
+----
+
+.IfcInductanceMeasure (SHACL)
+[source]
+----
+include::ttl/ifcinductancemeasure.ttl[]
+----
+
+==== Schema Mapping : Selects
+
+.IfcMaterialSelect (EXPRESS)
+[source]
+----
+include::express/ifcmaterialselect.exp[]
+----
+
+.IfcMaterialSelect (SHACL)
+[source]
+----
+include::ttl/ifcmaterialselect.ttl[]
+----
+
+==== Schema Mapping : Enumerations
+
+.IfcReinforcingMeshTypeEnum (EXPRESS)
+[source]
+----
+include::express/ifcreinforcingmeshtypeenum.exp[]
+----
+
+.IfcReinforcingMeshTypeEnum (SHACL)
+[source]
+----
+include::ttl/ifcreinforcingmeshtypeenum.ttl[]
+----
+
+==== Schema Mapping : Entities
+
+.IfcFillAreaStyleTiles (EXPRESS)
+[source]
+----
+include::express/ifcfillareastyletiles.exp[]
+----
+
+.IfcFillAreaStyleTiles (SHACL)
+[source]
+----
+include::ttl/ifcfillareastyletiles.ttl[]
+----
+
+==== Schema Mapping : Properties
+
+.IfcTiles (SHACL)
+[source]
+----
+include::ttl/ifctiles.ttl[]
+----
+
+.IfcTilingPattern (SHACL)
+[source]
+----
+include::ttl/ifctilingpattern.ttl[]
+----
+
+.IfcTilingScale (SHACL)
+[source]
+----
+include::ttl/ifctilingscale.ttl[]
+----
+
+For the IFC-LD SHACL encodings of existing IFC versions, see <<IFC SHACL Schema Definitions>>. 
+
+=== Integration
+
+IFC-LD applies https://www.w3.org/TR/shacl-af/#rules[SHACL Rules] in a standard pattern to support integration with domain-adjacent data models and ontologies. SHACL Rules may be written for any target ontology, by any number of stakeholders, and only assumes the availability of a SHACL Rules processor and input IFC-LD dataset. SHACL Rules support arbitrary rewriting of the IFC-LD graph, supporting data integration not practical with other approaches. 
+
+
+.Automatic Conversion of IFC-LD into https://w3c-lbd-cg.github.io/bot/#two-storey-building[Building Topology Ontology] using SHACL Rules
+[source]
+----
+include::../../profiles/bot.ttl[]
+----
+
+Other target ontologies, like https://brickschema.org/[BrickSchema], may be integrated into the IFC-LD ecosystem by writing the appropriate SHACL Rules. 
 
 === Extension
 
 IFC-LD's design inherits from RDF the benefits of https://en.wikipedia.org/wiki/Associative_property[associativity]. Practically, this means:
 
 - An IFC-LD graph can be divided into multiple independent subgraphs without loss of information. Conversely, independent IFC-LD subgraphs can composed into a new graph representing their union. This can be done using standard RDF tooling and is particularly useful for use cases where aspects of a built assets are owned by different parties.footnote:[<https://patterns.dataincubator.org/book/union-graph.html>]
-
 
 
 [example]
@@ -159,15 +272,6 @@ Returning
 [example]
 By adding a `ifc:version sh:node acme:supported_versions` triple declaration to a secondary schema, a SHACL validator will check that every IfcApplication `version` property instance conforms to the custom `acme:supported_versions` NodeShape and not just `ifc:ifclabel` defined by IFC.  
 
-=== Integration
-
-Based on linked data, IFC-LD allows IFC instances to be seamlessly integrated with, or translated to, adjacent ontologies. SPARQL CONSTRUCT queries support the general rewriting of IFC into these secondary formats.
-
-.Automatic Conversion of IFC into BOT 
-[example]
-TODO: add IFC to BOT SPARQL examples
-
-Similarly, the ability to `SELECT` arbitrary subgraphs of IFC-LD, along with the ability to `CONSTRUCT` other subgraphs from those selections, makes it practical to generate software SDKs target to specific IFC versions and their extensions.
 
 
 === Roadmap
@@ -303,86 +407,6 @@ link:json/sample.json[download]
 ----
 include::json/sample.json[]
 ----
-
-
-=== EXPRESS to SHACL Examples
-
-==== Types
-
-.IfcInductanceMeasure (EXPRESS)
-[source]
-----
-include::express/ifcinductancemeasure.exp[]
-----
-
-.IfcInductanceMeasure (SHACL)
-[source]
-----
-include::ttl/ifcinductancemeasure.ttl[]
-----
-
-==== Selects
-
-.IfcMaterialSelect (EXPRESS)
-[source]
-----
-include::express/ifcmaterialselect.exp[]
-----
-
-.IfcMaterialSelect (SHACL)
-[source]
-----
-include::ttl/ifcmaterialselect.ttl[]
-----
-
-==== Enumerations
-
-.IfcReinforcingMeshTypeEnum (EXPRESS)
-[source]
-----
-include::express/ifcreinforcingmeshtypeenum.exp[]
-----
-
-.IfcReinforcingMeshTypeEnum (SHACL)
-[source]
-----
-include::ttl/ifcreinforcingmeshtypeenum.ttl[]
-----
-
-==== Entities
-
-.IfcFillAreaStyleTiles (EXPRESS)
-[source]
-----
-include::express/ifcfillareastyletiles.exp[]
-----
-
-.IfcFillAreaStyleTiles (SHACL)
-[source]
-----
-include::ttl/ifcfillareastyletiles.ttl[]
-----
-
-==== Properties
-
-.IfcTiles (SHACL)
-[source]
-----
-include::ttl/ifctiles.ttl[]
-----
-
-.IfcTilingPattern (SHACL)
-[source]
-----
-include::ttl/ifctilingpattern.ttl[]
-----
-
-.IfcTilingScale (SHACL)
-[source]
-----
-include::ttl/ifctilingscale.ttl[]
-----
-
 
 
 === Acknowledgements
